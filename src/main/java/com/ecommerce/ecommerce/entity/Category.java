@@ -1,6 +1,15 @@
 package com.ecommerce.ecommerce.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -22,6 +31,9 @@ public class Category {
     private LocalDateTime updatedAt;
 
     private Boolean status = true;
+
+    @Transient
+    private long productCount;
 
     @PrePersist
     protected void onCreate() {
@@ -68,5 +80,13 @@ public class Category {
 
     public void setStatus(Boolean status) {
         this.status = status;
+    }
+
+    public long getProductCount() {
+        return productCount;
+    }
+
+    public void setProductCount(long productCount) {
+        this.productCount = productCount;
     }
 }
