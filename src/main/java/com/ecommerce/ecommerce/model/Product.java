@@ -1,15 +1,10 @@
 package com.ecommerce.ecommerce.model;
 
 import com.ecommerce.ecommerce.entity.Category;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 
 @Entity
+@Table(name = "products")
 public class Product {
 
     @Id
@@ -17,18 +12,24 @@ public class Product {
     private Long id;
 
     private String name;
+
+    @Column(length = 500)
+    private String description;
+
     private double price;
+
+    private String sku;
+
+    @Column(name = "inventory_count")
+    private int inventoryCount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
 
-    public Product() {
-    }
+    private boolean status = true;
 
-    public Product(String name, double price) {
-        this.name = name;
-        this.price = price;
+    public Product() {
     }
 
     public Long getId() {
@@ -47,6 +48,14 @@ public class Product {
         this.name = name;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public double getPrice() {
         return price;
     }
@@ -55,11 +64,35 @@ public class Product {
         this.price = price;
     }
 
+    public String getSku() {
+        return sku;
+    }
+
+    public void setSku(String sku) {
+        this.sku = sku;
+    }
+
+    public int getInventoryCount() {
+        return inventoryCount;
+    }
+
+    public void setInventoryCount(int inventoryCount) {
+        this.inventoryCount = inventoryCount;
+    }
+
     public Category getCategory() {
         return category;
     }
 
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
     }
 }
