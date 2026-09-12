@@ -3,261 +3,1219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Category Management | E-Commerce</title>
+    <title>E-Commerce Management System | Itvedant</title>
 
+    <!-- Bootstrap 5 CSS & Font Awesome -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
     <style>
+        :root {
+            --primary-color: #1f3c88;
+            --primary-hover: #162c64;
+            --accent-color: #0779e4;
+        }
+
         body {
-            background: #f5f7fb;
+            background: #f4f6fa;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #333;
         }
 
         .navbar-brand {
             font-weight: 700;
+            letter-spacing: 0.5px;
         }
 
-        .page-title {
-            color: #1f3c88;
-            font-weight: 700;
+        .nav-tabs .nav-link {
+            color: #495057;
+            font-weight: 600;
+            border: none;
+            border-bottom: 3px solid transparent;
+            padding: 12px 20px;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            background: transparent;
         }
 
         .card {
             border: 0;
-            border-radius: 14px;
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid #edf2f7;
+            padding: 1rem 1.25rem;
+            font-weight: 600;
+        }
+
+        .stat-card {
+            border-radius: 12px;
+            padding: 18px 20px;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-card .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .table thead th {
             background: #1f3c88;
             color: white;
+            font-weight: 600;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
+        .badge-pending {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        .badge-shipped {
+            background-color: #0dcaf0;
+            color: #000;
+        }
+
+        .badge-delivered {
+            background-color: #198754;
+            color: #fff;
+        }
+
+        .badge-cancelled {
+            background-color: #dc3545;
+            color: #fff;
         }
 
         .empty-state {
-            padding: 35px;
-            color: #6c757d;
+            padding: 40px;
             text-align: center;
+            color: #6c757d;
+        }
+
+        .filter-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
         }
     </style>
 </head>
 
 <body>
-<nav class="navbar navbar-dark bg-primary shadow-sm">
+
+<!-- Header Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark shadow-sm" style="background-color: var(--primary-color);">
     <div class="container">
-        <a class="navbar-brand" href="/">E-Commerce System</a>
-        <span class="navbar-text text-white">Admin Dashboard</span>
+        <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+            <i class="bi bi-box-seam-fill"></i> E-Commerce Management System
+        </a>
+        <span class="badge bg-light text-primary px-3 py-2 rounded-pill fw-semibold">
+            Itvedant Internship Project
+        </span>
     </div>
 </nav>
 
-<main class="container py-5">
-    <div class="mb-4">
-        <h1 class="page-title">Category Management</h1>
-        <p class="text-muted mb-0">Create, update, view, and deactivate product categories.</p>
-    </div>
+<!-- Main Container -->
+<main class="container py-4">
 
+    <!-- Global Alert Box -->
     <div id="messageBox"></div>
 
-    <div class="card mb-4">
-        <div class="card-body p-4">
-            <h4 id="formTitle" class="mb-3">Add New Category</h4>
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs mb-4 bg-white rounded-3 shadow-sm px-3 pt-2" id="moduleTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders-pane" type="button" role="tab">
+                <i class="bi bi-bag-check-fill me-1"></i> Order Management
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="products-tab" data-bs-toggle="tab" data-bs-target="#products-pane" type="button" role="tab">
+                <i class="bi bi-boxes me-1"></i> Product Management
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="categories-tab" data-bs-toggle="tab" data-bs-target="#categories-pane" type="button" role="tab">
+                <i class="bi bi-tags-fill me-1"></i> Category Management
+            </button>
+        </li>
+    </ul>
 
-            <form id="categoryForm">
-                <input type="hidden" id="categoryId">
+    <div class="tab-content" id="moduleTabsContent">
 
-                <div class="row g-3">
-                    <div class="col-md-5">
-                        <label for="categoryName" class="form-label">Category Name</label>
-                        <input type="text" id="categoryName" class="form-control" required maxlength="100">
-                    </div>
+        <!-- ============================================================== -->
+        <!-- TAB 1: ORDER MANAGEMENT MODULE -->
+        <!-- ============================================================== -->
+        <div class="tab-pane fade show active" id="orders-pane" role="tabpanel">
 
-                    <div class="col-md-5">
-                        <label for="description" class="form-label">Description</label>
-                        <input type="text" id="description" class="form-control" maxlength="300">
-                    </div>
-
-                    <div class="col-md-2 d-flex align-items-end gap-2">
-                        <button type="submit" class="btn btn-primary w-100">Save</button>
-                        <button type="button" id="cancelButton" class="btn btn-outline-secondary d-none">Cancel</button>
+            <!-- Order Stats Row -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card bg-primary">
+                        <div>
+                            <div class="stat-number" id="statTotalOrders">0</div>
+                            <div class="stat-label">Total Orders</div>
+                        </div>
+                        <i class="bi bi-cart3 fs-1 opacity-50"></i>
                     </div>
                 </div>
-            </form>
-        </div>
-    </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card bg-warning text-dark">
+                        <div>
+                            <div class="stat-number" id="statPendingOrders">0</div>
+                            <div class="stat-label">Pending Orders</div>
+                        </div>
+                        <i class="bi bi-clock-history fs-1 opacity-50"></i>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card bg-info text-dark">
+                        <div>
+                            <div class="stat-number" id="statShippedOrders">0</div>
+                            <div class="stat-label">Shipped Orders</div>
+                        </div>
+                        <i class="bi bi-truck fs-1 opacity-50"></i>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card bg-success">
+                        <div>
+                            <div class="stat-number" id="statDeliveredOrders">0</div>
+                            <div class="stat-label">Delivered Orders</div>
+                        </div>
+                        <i class="bi bi-check-circle-fill fs-1 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
 
-    <div class="card">
-        <div class="card-header bg-white py-3">
-            <h4 class="mb-0">Category Dashboard</h4>
+            <!-- Orders Action & Filters Header -->
+            <div class="card">
+                <div class="card-body p-3">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <!-- Status Filter Buttons -->
+                        <div class="btn-group" role="group" id="orderFilterGroup">
+                            <button type="button" class="btn btn-outline-secondary filter-btn active" onclick="filterOrders('ALL', this)">All</button>
+                            <button type="button" class="btn btn-outline-secondary filter-btn" onclick="filterOrders('Pending', this)">Pending</button>
+                            <button type="button" class="btn btn-outline-secondary filter-btn" onclick="filterOrders('Shipped', this)">Shipped</button>
+                            <button type="button" class="btn btn-outline-secondary filter-btn" onclick="filterOrders('Delivered', this)">Delivered</button>
+                            <button type="button" class="btn btn-outline-secondary filter-btn" onclick="filterOrders('Cancelled', this)">Cancelled</button>
+                        </div>
+
+                        <!-- Place Order Button -->
+                        <button class="btn btn-primary d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#placeOrderModal" onclick="openPlaceOrderModal()">
+                            <i class="bi bi-cart-plus-fill"></i> Place New Order (Shopping Cart)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders Table Card -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-table me-2"></i>Customer Orders Dashboard</h5>
+                    <button class="btn btn-sm btn-outline-primary" onclick="loadOrders()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer Name</th>
+                            <th>Shipping Address</th>
+                            <th>Items</th>
+                            <th>Total Amount</th>
+                            <th>Order Status</th>
+                            <th>Active Status</th>
+                            <th>Placed At</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                        <tr>
+                            <td colspan="9" class="empty-state">Loading orders...</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Category Name</th>
-                    <th>Description</th>
-                    <th>Products</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
+        <!-- ============================================================== -->
+        <!-- TAB 2: PRODUCT MANAGEMENT MODULE -->
+        <!-- ============================================================== -->
+        <div class="tab-pane fade" id="products-pane" role="tabpanel">
+            <div class="card">
+                <div class="card-body p-4">
+                    <h4 id="productFormTitle" class="mb-3">Add New Product</h4>
+                    <form id="productForm">
+                        <input type="hidden" id="productId">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="productName" class="form-label">Product Name</label>
+                                <input type="text" id="productName" class="form-control" required placeholder="e.g. Wireless Mouse">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="productPrice" class="form-label">Price ($)</label>
+                                <input type="number" step="0.01" id="productPrice" class="form-control" required placeholder="49.99">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="productInventory" class="form-label">Inventory Count</label>
+                                <input type="number" id="productInventory" class="form-control" required placeholder="25">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="productSku" class="form-label">SKU</label>
+                                <input type="text" id="productSku" class="form-control" required placeholder="WM-101">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="productCategorySelect" class="form-label">Category</label>
+                                <select id="productCategorySelect" class="form-select" required>
+                                    <option value="">Select...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-10">
+                                <label for="productDescription" class="form-label">Description</label>
+                                <input type="text" id="productDescription" class="form-control" placeholder="Brief product description">
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end gap-2">
+                                <button type="submit" class="btn btn-primary w-100">Save</button>
+                                <button type="button" id="productCancelBtn" class="btn btn-outline-secondary d-none" onclick="resetProductForm()">Cancel</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
-                <tbody id="categoryTableBody">
-                <tr>
-                    <td colspan="6" class="empty-state">Loading categories...</td>
-                </tr>
-                </tbody>
-            </table>
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-grid me-2"></i>Product Catalog</h5>
+                    <button class="btn btn-sm btn-outline-primary" onclick="loadProducts()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Product Name</th>
+                            <th>SKU</th>
+                            <th>Price</th>
+                            <th>Inventory</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="productTableBody">
+                        <tr>
+                            <td colspan="8" class="empty-state">Loading products...</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
+
+        <!-- ============================================================== -->
+        <!-- TAB 3: CATEGORY MANAGEMENT MODULE -->
+        <!-- ============================================================== -->
+        <div class="tab-pane fade" id="categories-pane" role="tabpanel">
+            <div class="card">
+                <div class="card-body p-4">
+                    <h4 id="categoryFormTitle" class="mb-3">Add New Category</h4>
+                    <form id="categoryForm">
+                        <input type="hidden" id="categoryId">
+                        <div class="row g-3">
+                            <div class="col-md-5">
+                                <label for="categoryName" class="form-label">Category Name</label>
+                                <input type="text" id="categoryName" class="form-control" required maxlength="100" placeholder="e.g. Electronics">
+                            </div>
+                            <div class="col-md-5">
+                                <label for="categoryDescription" class="form-label">Description</label>
+                                <input type="text" id="categoryDescription" class="form-control" maxlength="300" placeholder="Category details">
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end gap-2">
+                                <button type="submit" class="btn btn-primary w-100">Save</button>
+                                <button type="button" id="categoryCancelBtn" class="btn btn-outline-secondary d-none" onclick="resetCategoryForm()">Cancel</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-folder2-open me-2"></i>Category List</h5>
+                    <button class="btn btn-sm btn-outline-primary" onclick="loadCategories()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Category Name</th>
+                            <th>Description</th>
+                            <th>Products Count</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="categoryTableBody">
+                        <tr>
+                            <td colspan="6" class="empty-state">Loading categories...</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 </main>
 
-<script>
-    const apiUrl = "/api/categories";
-    const categoryForm = document.getElementById("categoryForm");
-    const categoryIdInput = document.getElementById("categoryId");
-    const categoryNameInput = document.getElementById("categoryName");
-    const descriptionInput = document.getElementById("description");
-    const categoryTableBody = document.getElementById("categoryTableBody");
-    const formTitle = document.getElementById("formTitle");
-    const cancelButton = document.getElementById("cancelButton");
-    const messageBox = document.getElementById("messageBox");
+<!-- ============================================================== -->
+<!-- MODAL: PLACE AN ORDER (SHOPPING CART) -->
+<!-- ============================================================== -->
+<div class="modal fade" id="placeOrderModal" tabindex="-1" aria-labelledby="placeOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="placeOrderModalLabel"><i class="bi bi-cart3 me-2"></i>Place New Order (Shopping Cart)</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="placeOrderForm">
+                    <!-- Customer Information -->
+                    <h6 class="fw-bold text-primary mb-3"><i class="bi bi-person me-2"></i>Customer Information</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label for="orderCustomerName" class="form-label">Customer Name *</label>
+                            <input type="text" id="orderCustomerName" class="form-control" required placeholder="e.g. Zeenat Ansari">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="orderCustomerEmail" class="form-label">Email Address *</label>
+                            <input type="email" id="orderCustomerEmail" class="form-control" required placeholder="zeenat@example.com">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="orderCustomerPhone" class="form-label">Phone Number</label>
+                            <input type="text" id="orderCustomerPhone" class="form-control" placeholder="+91 9876543210">
+                        </div>
+                        <div class="col-12">
+                            <label for="orderShippingAddress" class="form-label">Shipping Address *</label>
+                            <textarea id="orderShippingAddress" class="form-control" rows="2" required maxlength="300" placeholder="Street Address, City, State, PIN code"></textarea>
+                        </div>
+                    </div>
 
-    async function loadCategories() {
-        try {
-            const response = await fetch(apiUrl);
-            const categories = await response.json();
+                    <!-- Cart Selection -->
+                    <h6 class="fw-bold text-primary mb-3"><i class="bi bi-bag-plus me-2"></i>Select Products</h6>
+                    <div class="row g-2 mb-3 align-items-end">
+                        <div class="col-md-7">
+                            <label class="form-label">Product</label>
+                            <select id="cartProductSelect" class="form-select">
+                                <option value="">Select a product...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" id="cartProductQty" class="form-control" min="1" value="1">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-outline-primary w-100" onclick="addItemToCart()">
+                                <i class="bi bi-plus-lg"></i> Add
+                            </button>
+                        </div>
+                    </div>
 
-            if (categories.length === 0) {
-                categoryTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="empty-state">No categories found. Add your first category above.</td>
-                    </tr>`;
-                return;
-            }
+                    <!-- Cart Items Table -->
+                    <div class="table-responsive border rounded-3 mb-3">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th class="text-end">Price</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-end">Total</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                            </thead>
+                            <tbody id="cartTableBody">
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-3">No products added yet. Select products above.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-            categoryTableBody.innerHTML = categories.map(category => `
-                <tr>
-                    <td>${category.categoryId}</td>
-                    <td>${category.categoryName}</td>
-                    <td>${category.description || "-"}</td>
-                    <td>${category.productCount ?? 0}</td>
-                    <td>
-                        <span class="badge ${category.status ? "bg-success" : "bg-secondary"}">
-                            ${category.status ? "Active" : "Inactive"}
-                        </span>
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary me-1"
-                                onclick="editCategory(${category.categoryId}, '${escapeText(category.categoryName)}', '${escapeText(category.description || "")}')">
-                            Edit
+                    <!-- Calculation Breakdown Card -->
+                    <div class="card bg-light border">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted">Subtotal:</span>
+                                <span class="fw-semibold" id="cartSubtotal">$0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted">Estimated Tax (5%):</span>
+                                <span class="fw-semibold" id="cartTax">$0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Shipping Cost:</span>
+                                <span class="fw-semibold" id="cartShipping">$0.00</span>
+                            </div>
+                            <hr class="my-2">
+                            <div class="d-flex justify-content-between fs-5 fw-bold text-primary">
+                                <span>Total Amount:</span>
+                                <span id="cartGrandTotal">$0.00</span>
+                            </div>
+                            <small class="text-muted d-block mt-1">Free shipping applied on orders over $100.00</small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary px-4" id="submitOrderBtn">
+                            <i class="bi bi-check-circle me-1"></i> Confirm & Place Order
                         </button>
-                        ${category.status ? `
-                            <button class="btn btn-sm btn-outline-danger"
-                                    onclick="deactivateCategory(${category.categoryId}, ${category.productCount ?? 0})">
-                                Deactivate
-                            </button>` : ""}
-                    </td>
-                </tr>
-            `).join("");
-        } catch (error) {
-            showMessage("Could not load categories. Please check that the application is running.", "danger");
-        }
-    }
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
-    categoryForm.addEventListener("submit", async function (event) {
-        event.preventDefault();
+<!-- ============================================================== -->
+<!-- MODAL: VIEW ORDER DETAILS -->
+<!-- ============================================================== -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title"><i class="bi bi-receipt me-2"></i>Order Details #<span id="modalOrderId"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" id="orderDetailsContent">
+                <!-- Injected by JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-        const category = {
-            categoryName: categoryNameInput.value.trim(),
-            description: descriptionInput.value.trim()
-        };
+<!-- ============================================================== -->
+<!-- MODAL: UPDATE ORDER STATUS -->
+<!-- ============================================================== -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Update Order Status</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="updateOrderId">
+                <p>Update status for Order <strong>#<span id="updateOrderDisplayId"></span></strong>:</p>
+                <div class="mb-3">
+                    <label for="newStatusSelect" class="form-label">Select New Status</label>
+                    <select id="newStatusSelect" class="form-select">
+                        <option value="Pending">Pending</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitStatusUpdate()">Update Status</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-        const id = categoryIdInput.value;
-        const method = id ? "PUT" : "POST";
-        const url = id ? `${apiUrl}/${id}` : apiUrl;
+<!-- Bootstrap 5 Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-        try {
-            const response = await fetch(url, {
-                method: method,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(category)
-            });
+<script>
+    // Global state
+    let cachedProducts = [];
+    let cachedCategories = [];
+    let cachedOrders = [];
+    let cartItems = [];
+    let currentStatusFilter = "ALL";
 
-            if (!response.ok) {
-                throw new Error();
-            }
-
-            showMessage(id ? "Category updated successfully." : "Category created successfully.", "success");
-            resetForm();
-            loadCategories();
-        } catch (error) {
-            showMessage("Could not save the category.", "danger");
-        }
+    // -------------------------------------------------------------
+    // INITIALIZATION
+    // -------------------------------------------------------------
+    document.addEventListener("DOMContentLoaded", () => {
+        loadOrders();
+        loadProducts();
+        loadCategories();
     });
 
-    function editCategory(id, name, description) {
-        categoryIdInput.value = id;
-        categoryNameInput.value = name;
-        descriptionInput.value = description;
-        formTitle.textContent = "Update Category";
-        cancelButton.classList.remove("d-none");
+    // Global Message Alert
+    function showMessage(message, type = "info") {
+        const box = document.getElementById("messageBox");
+        box.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show shadow-sm" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
         window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    async function deactivateCategory(id, productCount) {
-        let warning = "Are you sure you want to deactivate this category?";
+    function escapeText(str) {
+        if (!str) return "";
+        return String(str).replace(/'/g, "\\'").replace(/"/g, "&quot;");
+    }
 
-        if (productCount > 0) {
-            warning = `This category has ${productCount} product(s). Assign products to another category before deactivating it.`;
+    // =============================================================
+    // 1. ORDER MANAGEMENT LOGIC
+    // =============================================================
+    async function loadOrders() {
+        const tableBody = document.getElementById("ordersTableBody");
+        try {
+            const url = currentStatusFilter && currentStatusFilter !== "ALL"
+                ? `/api/orders?status=${encodeURIComponent(currentStatusFilter)}`
+                : "/api/orders";
+
+            const res = await fetch(url);
+            if (!res.ok) throw new Error("Failed to fetch orders");
+            const orders = await res.json();
+            cachedOrders = orders;
+
+            updateOrderStats(orders);
+            renderOrdersTable(orders);
+        } catch (err) {
+            tableBody.innerHTML = `<tr><td colspan="9" class="empty-state text-danger">Error loading orders: ${err.message}</td></tr>`;
+        }
+    }
+
+    async function updateOrderStats(filteredOrders) {
+        // Fetch full list for stats if needed
+        let allList = filteredOrders;
+        if (currentStatusFilter !== "ALL") {
+            try {
+                const res = await fetch("/api/orders");
+                allList = await res.json();
+            } catch (e) {}
         }
 
-        if (!confirm(warning)) {
+        document.getElementById("statTotalOrders").textContent = allList.length;
+        document.getElementById("statPendingOrders").textContent = allList.filter(o => o.orderStatus === "Pending").length;
+        document.getElementById("statShippedOrders").textContent = allList.filter(o => o.orderStatus === "Shipped").length;
+        document.getElementById("statDeliveredOrders").textContent = allList.filter(o => o.orderStatus === "Delivered").length;
+    }
+
+    function filterOrders(status, btnElement) {
+        currentStatusFilter = status;
+        document.querySelectorAll("#orderFilterGroup .filter-btn").forEach(btn => btn.classList.remove("active"));
+        if (btnElement) btnElement.classList.add("active");
+        loadOrders();
+    }
+
+    function renderOrdersTable(orders) {
+        const tbody = document.getElementById("ordersTableBody");
+        if (!orders || orders.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" class="empty-state">No orders found matching the filter.</td></tr>`;
             return;
         }
 
-        if (productCount > 0) {
-            showMessage("Please assign the products to another category first.", "warning");
+        tbody.innerHTML = orders.map(order => {
+            const statusClass = getStatusBadgeClass(order.orderStatus);
+            const formattedDate = order.createdAt ? new Date(order.createdAt).toLocaleString() : "-";
+            const itemCount = order.items ? order.items.length : 0;
+            const canCancel = order.orderStatus === "Pending" && order.status !== false;
+
+            return `
+                <tr>
+                    <td><strong>#${order.id}</strong></td>
+                    <td>
+                        <div class="fw-semibold">${escapeText(order.customerName)}</div>
+                        <small class="text-muted">User ID: ${order.userId || (order.user ? order.user.id : "N/A")}</small>
+                    </td>
+                    <td><small class="d-inline-block text-truncate" style="max-width: 180px;">${escapeText(order.shippingAddress)}</small></td>
+                    <td><span class="badge bg-light text-dark border">${itemCount} item(s)</span></td>
+                    <td><strong class="text-primary">$${Number(order.totalAmount).toFixed(2)}</strong></td>
+                    <td><span class="badge ${statusClass}">${order.orderStatus}</span></td>
+                    <td>
+                        <span class="badge ${order.status ? 'bg-success-subtle text-success border border-success' : 'bg-danger-subtle text-danger border border-danger'}">
+                            ${order.status ? 'Active' : 'Cancelled'}
+                        </span>
+                    </td>
+                    <td><small class="text-muted">${formattedDate}</small></td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" title="View Details" onclick="viewOrderDetails(${order.id})">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            ${order.orderStatus !== 'Cancelled' ? `
+                                <button class="btn btn-outline-secondary" title="Update Status" onclick="openUpdateStatusModal(${order.id}, '${order.orderStatus}')">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            ` : ''}
+                            ${canCancel ? `
+                                <button class="btn btn-outline-danger" title="Cancel Order (Soft Delete)" onclick="cancelOrder(${order.id})">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+    }
+
+    function getStatusBadgeClass(status) {
+        switch (status) {
+            case "Pending": return "badge-pending";
+            case "Shipped": return "badge-shipped";
+            case "Delivered": return "badge-delivered";
+            case "Cancelled": return "badge-cancelled";
+            default: return "bg-secondary text-white";
+        }
+    }
+
+    // Modal: Open Place Order
+    function openPlaceOrderModal() {
+        cartItems = [];
+        updateCartDisplay();
+        populateCartProductSelect();
+    }
+
+    function populateCartProductSelect() {
+        const select = document.getElementById("cartProductSelect");
+        select.innerHTML = '<option value="">Select a product...</option>';
+        cachedProducts.filter(p => p.status && p.inventoryCount > 0).forEach(p => {
+            select.innerHTML += `<option value="${p.id}" data-price="${p.price}" data-name="${p.name}" data-stock="${p.inventoryCount}">
+                ${p.name} - $${Number(p.price).toFixed(2)} (Stock: ${p.inventoryCount})
+            </option>`;
+        });
+    }
+
+    function addItemToCart() {
+        const select = document.getElementById("cartProductSelect");
+        const qtyInput = document.getElementById("cartProductQty");
+        const productId = Number(select.value);
+        const quantity = parseInt(qtyInput.value) || 1;
+
+        if (!productId) {
+            alert("Please select a product.");
+            return;
+        }
+
+        const selectedOption = select.options[select.selectedIndex];
+        const stock = parseInt(selectedOption.getAttribute("data-stock"));
+        const price = parseFloat(selectedOption.getAttribute("data-price"));
+        const name = selectedOption.getAttribute("data-name");
+
+        const existing = cartItems.find(i => i.productId === productId);
+        const currentQtyInCart = existing ? existing.quantity : 0;
+
+        if (currentQtyInCart + quantity > stock) {
+            alert(`Cannot add ${quantity}. Available stock is only ${stock}.`);
+            return;
+        }
+
+        if (existing) {
+            existing.quantity += quantity;
+        } else {
+            cartItems.push({ productId, productName: name, price, quantity });
+        }
+
+        qtyInput.value = "1";
+        updateCartDisplay();
+    }
+
+    function removeCartItem(index) {
+        cartItems.splice(index, 1);
+        updateCartDisplay();
+    }
+
+    function updateCartDisplay() {
+        const tbody = document.getElementById("cartTableBody");
+        if (cartItems.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">No products added yet. Select products above.</td></tr>`;
+            document.getElementById("cartSubtotal").textContent = "$0.00";
+            document.getElementById("cartTax").textContent = "$0.00";
+            document.getElementById("cartShipping").textContent = "$0.00";
+            document.getElementById("cartGrandTotal").textContent = "$0.00";
+            return;
+        }
+
+        let subtotal = 0;
+        tbody.innerHTML = cartItems.map((item, idx) => {
+            const lineTotal = item.price * item.quantity;
+            subtotal += lineTotal;
+            return `
+                <tr>
+                    <td><strong>${escapeText(item.productName)}</strong></td>
+                    <td class="text-end">$${item.price.toFixed(2)}</td>
+                    <td class="text-center">${item.quantity}</td>
+                    <td class="text-end">$${lineTotal.toFixed(2)}</td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="removeCartItem(${idx})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+
+        const tax = subtotal * 0.05;
+        const shipping = subtotal >= 100 ? 0.00 : 10.00;
+        const grandTotal = subtotal + tax + shipping;
+
+        document.getElementById("cartSubtotal").textContent = `$${subtotal.toFixed(2)}`;
+        document.getElementById("cartTax").textContent = `$${tax.toFixed(2)}`;
+        document.getElementById("cartShipping").textContent = `$${shipping.toFixed(2)}`;
+        document.getElementById("cartGrandTotal").textContent = `$${grandTotal.toFixed(2)}`;
+    }
+
+    // Place Order Submission
+    document.getElementById("placeOrderForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (cartItems.length === 0) {
+            alert("Your shopping cart is empty! Please add at least one product.");
+            return;
+        }
+
+        const payload = {
+            customerName: document.getElementById("orderCustomerName").value.trim(),
+            customerEmail: document.getElementById("orderCustomerEmail").value.trim(),
+            customerPhone: document.getElementById("orderCustomerPhone").value.trim(),
+            shippingAddress: document.getElementById("orderShippingAddress").value.trim(),
+            items: cartItems.map(i => ({ productId: i.productId, quantity: i.quantity }))
+        };
+
+        try {
+            const res = await fetch("/api/orders", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error || "Failed to place order");
+            }
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById("placeOrderModal"));
+            if (modal) modal.hide();
+
+            document.getElementById("placeOrderForm").reset();
+            cartItems = [];
+
+            showMessage(`Order #${data.id} placed successfully! Total: $${Number(data.totalAmount).toFixed(2)}`, "success");
+            loadOrders();
+            loadProducts(); // refresh inventory
+        } catch (err) {
+            alert(err.message);
+        }
+    });
+
+    // View Order Details Modal
+    async function viewOrderDetails(id) {
+        try {
+            const res = await fetch(`/api/orders/${id}`);
+            if (!res.ok) throw new Error("Could not load order details");
+            const order = await res.json();
+
+            document.getElementById("modalOrderId").textContent = order.id;
+
+            const itemsHtml = order.items && order.items.length > 0
+                ? order.items.map(item => `
+                    <tr>
+                        <td><strong>${escapeText(item.productName || (item.product ? item.product.name : "Product"))}</strong></td>
+                        <td class="text-end">$${Number(item.price).toFixed(2)}</td>
+                        <td class="text-center">${item.quantity}</td>
+                        <td class="text-end fw-semibold">$${Number(item.itemTotal).toFixed(2)}</td>
+                    </tr>
+                `).join("")
+                : `<tr><td colspan="4" class="text-center text-muted">No line items available</td></tr>`;
+
+            document.getElementById("orderDetailsContent").innerHTML = `
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded">
+                            <h6 class="fw-bold mb-2"><i class="bi bi-person me-1"></i> Customer Information</h6>
+                            <div><strong>Name:</strong> ${escapeText(order.customerName)}</div>
+                            <div><strong>User ID:</strong> ${order.userId || "N/A"}</div>
+                            <div><strong>Date Placed:</strong> ${new Date(order.createdAt).toLocaleString()}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded">
+                            <h6 class="fw-bold mb-2"><i class="bi bi-geo-alt me-1"></i> Delivery Information</h6>
+                            <div><strong>Address:</strong> ${escapeText(order.shippingAddress)}</div>
+                            <div><strong>Status:</strong> <span class="badge ${getStatusBadgeClass(order.orderStatus)}">${order.orderStatus}</span></div>
+                            <div><strong>Soft Delete Status:</strong> ${order.status ? 'Active (True)' : 'Cancelled (False)'}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold mb-2"><i class="bi bi-box me-1"></i> Ordered Items</h6>
+                <div class="table-responsive border rounded mb-3">
+                    <table class="table table-sm mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th class="text-end">Unit Price</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>${itemsHtml}</tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <div style="min-width: 260px;">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Subtotal:</span>
+                            <span>$${Number(order.subtotal || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Tax (5%):</span>
+                            <span>$${Number(order.taxAmount || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Shipping Cost:</span>
+                            <span>$${Number(order.shippingCost || 0).toFixed(2)}</span>
+                        </div>
+                        <hr class="my-1">
+                        <div class="d-flex justify-content-between fs-5 fw-bold text-primary">
+                            <span>Total Amount:</span>
+                            <span>$${Number(order.totalAmount).toFixed(2)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            new bootstrap.Modal(document.getElementById("orderDetailsModal")).show();
+        } catch (err) {
+            alert(err.message);
+        }
+    }
+
+    // Modal: Open Update Order Status
+    function openUpdateStatusModal(id, currentStatus) {
+        document.getElementById("updateOrderId").value = id;
+        document.getElementById("updateOrderDisplayId").textContent = id;
+        document.getElementById("newStatusSelect").value = currentStatus;
+        new bootstrap.Modal(document.getElementById("updateStatusModal")).show();
+    }
+
+    async function submitStatusUpdate() {
+        const id = document.getElementById("updateOrderId").value;
+        const newStatus = document.getElementById("newStatusSelect").value;
+
+        try {
+            const res = await fetch(`/api/orders/${id}/status`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ orderStatus: newStatus })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Failed to update status");
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById("updateStatusModal"));
+            if (modal) modal.hide();
+
+            showMessage(`Order #${id} status updated to '${newStatus}'`, "success");
+            loadOrders();
+        } catch (err) {
+            alert(err.message);
+        }
+    }
+
+    // Cancel Order (Soft delete)
+    async function cancelOrder(id) {
+        if (!confirm(`Are you sure you want to cancel Order #${id}? Soft delete will set status to 'Cancelled' and restore product inventory.`)) {
             return;
         }
 
         try {
-            const response = await fetch(`${apiUrl}/${id}`, { method: "DELETE" });
+            const res = await fetch(`/api/orders/${id}`, { method: "DELETE" });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Could not cancel order");
 
-            if (!response.ok) {
-                throw new Error();
-            }
-
-            showMessage("Category deactivated successfully.", "success");
-            loadCategories();
-        } catch (error) {
-            showMessage("Could not deactivate the category.", "danger");
+            showMessage(`Order #${id} has been cancelled (soft deleted) and inventory restored.`, "warning");
+            loadOrders();
+            loadProducts();
+        } catch (err) {
+            alert(err.message);
         }
     }
 
-    function resetForm() {
-        categoryForm.reset();
-        categoryIdInput.value = "";
-        formTitle.textContent = "Add New Category";
-        cancelButton.classList.add("d-none");
+    // =============================================================
+    // 2. PRODUCT MANAGEMENT LOGIC
+    // =============================================================
+    async function loadProducts() {
+        try {
+            const res = await fetch("/products");
+            if (!res.ok) throw new Error("Could not load products");
+            cachedProducts = await res.json();
+            renderProductTable(cachedProducts);
+            populateCartProductSelect();
+        } catch (e) {
+            document.getElementById("productTableBody").innerHTML = `<tr><td colspan="8" class="empty-state text-danger">Error loading products</td></tr>`;
+        }
     }
 
-    function showMessage(message, type) {
-        messageBox.innerHTML = `
-            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>`;
+    function renderProductTable(products) {
+        const tbody = document.getElementById("productTableBody");
+        if (!products || products.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="empty-state">No products found. Add your first product above.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = products.map(p => `
+            <tr>
+                <td>${p.id}</td>
+                <td><strong>${escapeText(p.name)}</strong></td>
+                <td><code>${escapeText(p.sku)}</code></td>
+                <td>$${Number(p.price).toFixed(2)}</td>
+                <td>
+                    <span class="badge ${p.inventoryCount > 5 ? 'bg-success' : (p.inventoryCount > 0 ? 'bg-warning text-dark' : 'bg-danger')}">
+                        ${p.inventoryCount} in stock
+                    </span>
+                </td>
+                <td>${p.category ? escapeText(p.category.categoryName) : "-"}</td>
+                <td>
+                    <span class="badge ${p.status ? 'bg-success' : 'bg-secondary'}">
+                        ${p.status ? 'Active' : 'Inactive'}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editProduct(${p.id})">Edit</button>
+                    ${p.status ? `
+                        <button class="btn btn-sm btn-outline-danger" onclick="deactivateProduct(${p.id})">Deactivate</button>
+                    ` : ''}
+                </td>
+            </tr>
+        `).join("");
     }
 
-    function escapeText(value) {
-        return String(value).replace(/'/g, "\\'");
+    document.getElementById("productForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const id = document.getElementById("productId").value;
+        const categoryId = document.getElementById("productCategorySelect").value;
+
+        const payload = {
+            name: document.getElementById("productName").value.trim(),
+            description: document.getElementById("productDescription").value.trim(),
+            price: parseFloat(document.getElementById("productPrice").value),
+            sku: document.getElementById("productSku").value.trim(),
+            inventoryCount: parseInt(document.getElementById("productInventory").value),
+            category: categoryId ? { categoryId: Number(categoryId) } : null,
+            status: true
+        };
+
+        const method = id ? "PUT" : "POST";
+        const url = id ? `/products/${id}` : "/products";
+
+        try {
+            const res = await fetch(url, {
+                method,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) throw new Error("Failed to save product");
+
+            showMessage(id ? "Product updated successfully!" : "Product created successfully!", "success");
+            resetProductForm();
+            loadProducts();
+        } catch (err) {
+            showMessage(err.message, "danger");
+        }
+    });
+
+    function editProduct(id) {
+        const product = cachedProducts.find(p => p.id === id);
+        if (!product) return;
+
+        document.getElementById("productId").value = product.id;
+        document.getElementById("productName").value = product.name;
+        document.getElementById("productPrice").value = product.price;
+        document.getElementById("productInventory").value = product.inventoryCount;
+        document.getElementById("productSku").value = product.sku;
+        document.getElementById("productDescription").value = product.description || "";
+        if (product.category) {
+            document.getElementById("productCategorySelect").value = product.category.categoryId;
+        }
+
+        document.getElementById("productFormTitle").textContent = "Update Product";
+        document.getElementById("productCancelBtn").classList.remove("d-none");
+        window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    cancelButton.addEventListener("click", resetForm);
+    async function deactivateProduct(id) {
+        if (!confirm("Are you sure you want to deactivate this product?")) return;
+        try {
+            const res = await fetch(`/products/${id}/deactivate`, { method: "PUT" });
+            if (!res.ok) throw new Error("Failed to deactivate product");
+            showMessage("Product deactivated successfully.", "success");
+            loadProducts();
+        } catch (err) {
+            showMessage(err.message, "danger");
+        }
+    }
 
-    loadCategories();
+    function resetProductForm() {
+        document.getElementById("productForm").reset();
+        document.getElementById("productId").value = "";
+        document.getElementById("productFormTitle").textContent = "Add New Product";
+        document.getElementById("productCancelBtn").classList.add("d-none");
+    }
+
+    // =============================================================
+    // 3. CATEGORY MANAGEMENT LOGIC
+    // =============================================================
+    async function loadCategories() {
+        try {
+            const res = await fetch("/api/categories");
+            if (!res.ok) throw new Error("Could not load categories");
+            cachedCategories = await res.json();
+            renderCategoryTable(cachedCategories);
+            populateCategorySelect(cachedCategories);
+        } catch (e) {
+            document.getElementById("categoryTableBody").innerHTML = `<tr><td colspan="6" class="empty-state text-danger">Error loading categories</td></tr>`;
+        }
+    }
+
+    function populateCategorySelect(categories) {
+        const select = document.getElementById("productCategorySelect");
+        select.innerHTML = '<option value="">Select...</option>';
+        categories.filter(c => c.status).forEach(c => {
+            select.innerHTML += `<option value="${c.categoryId}">${c.categoryName}</option>`;
+        });
+    }
+
+    function renderCategoryTable(categories) {
+        const tbody = document.getElementById("categoryTableBody");
+        if (!categories || categories.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No categories found. Add your first category above.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = categories.map(c => `
+            <tr>
+                <td>${c.categoryId}</td>
+                <td><strong>${escapeText(c.categoryName)}</strong></td>
+                <td>${escapeText(c.description || "-")}</td>
+                <td><span class="badge bg-light text-dark border">${c.productCount ?? 0}</span></td>
+                <td>
+                    <span class="badge ${c.status ? 'bg-success' : 'bg-secondary'}">
+                        ${c.status ? 'Active' : 'Inactive'}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary me-1"
+                            onclick="editCategory(${c.categoryId}, '${escapeText(c.categoryName)}', '${escapeText(c.description || '')}')">
+                        Edit
+                    </button>
+                    ${c.status ? `
+                        <button class="btn btn-sm btn-outline-danger" onclick="deactivateCategory(${c.categoryId}, ${c.productCount ?? 0})">
+                            Deactivate
+                        </button>
+                    ` : ''}
+                </td>
+            </tr>
+        `).join("");
+    }
+
+    document.getElementById("categoryForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const id = document.getElementById("categoryId").value;
+        const payload = {
+            categoryName: document.getElementById("categoryName").value.trim(),
+            description: document.getElementById("categoryDescription").value.trim()
+        };
+
+        const method = id ? "PUT" : "POST";
+        const url = id ? `/api/categories/${id}` : "/api/categories";
+
+        try {
+            const res = await fetch(url, {
+                method,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) throw new Error("Failed to save category");
+
+            showMessage(id ? "Category updated successfully!" : "Category created successfully!", "success");
+            resetCategoryForm();
+            loadCategories();
+        } catch (err) {
+            showMessage(err.message, "danger");
+        }
+    });
+
+    function editCategory(id, name, desc) {
+        document.getElementById("categoryId").value = id;
+        document.getElementById("categoryName").value = name;
+        document.getElementById("categoryDescription").value = desc;
+        document.getElementById("categoryFormTitle").textContent = "Update Category";
+        document.getElementById("categoryCancelBtn").classList.remove("d-none");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function deactivateCategory(id, count) {
+        if (count > 0) {
+            alert(`This category has ${count} product(s). Please assign them to another category first.`);
+            return;
+        }
+        if (!confirm("Are you sure you want to deactivate this category?")) return;
+
+        try {
+            const res = await fetch(`/api/categories/${id}`, { method: "DELETE" });
+            if (!res.ok) throw new Error("Could not deactivate category");
+            showMessage("Category deactivated successfully.", "success");
+            loadCategories();
+        } catch (err) {
+            showMessage(err.message, "danger");
+        }
+    }
+
+    function resetCategoryForm() {
+        document.getElementById("categoryForm").reset();
+        document.getElementById("categoryId").value = "";
+        document.getElementById("categoryFormTitle").textContent = "Add New Category";
+        document.getElementById("categoryCancelBtn").classList.add("d-none");
+    }
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
