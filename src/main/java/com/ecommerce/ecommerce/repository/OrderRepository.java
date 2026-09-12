@@ -11,4 +11,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByOrderStatusIgnoreCaseOrderByCreatedAtDesc(String orderStatus);
 
     List<Order> findByStatusOrderByCreatedAtDesc(Boolean status);
+
+    List<Order> findByUserUserIdOrderByCreatedAtDesc(Long userId);
 }

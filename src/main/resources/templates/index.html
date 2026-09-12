@@ -157,7 +157,12 @@
     <!-- Navigation Tabs -->
     <ul class="nav nav-tabs mb-4 bg-white rounded-3 shadow-sm px-3 pt-2" id="moduleTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders-pane" type="button" role="tab">
+            <button class="nav-link active" id="customers-tab" data-bs-toggle="tab" data-bs-target="#customers-pane" type="button" role="tab">
+                <i class="bi bi-people-fill me-1"></i> Customer Management
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders-pane" type="button" role="tab">
                 <i class="bi bi-bag-check-fill me-1"></i> Order Management
             </button>
         </li>
@@ -176,9 +181,116 @@
     <div class="tab-content" id="moduleTabsContent">
 
         <!-- ============================================================== -->
-        <!-- TAB 1: ORDER MANAGEMENT MODULE -->
+        <!-- TAB 1: CUSTOMER MANAGEMENT MODULE -->
         <!-- ============================================================== -->
-        <div class="tab-pane fade show active" id="orders-pane" role="tabpanel">
+        <div class="tab-pane fade show active" id="customers-pane" role="tabpanel">
+
+            <!-- Customer Stats Row -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4 col-sm-6">
+                    <div class="stat-card bg-primary">
+                        <div>
+                            <div class="stat-number" id="statTotalCustomers">0</div>
+                            <div class="stat-label">Total Customers</div>
+                        </div>
+                        <i class="bi bi-people fs-1 opacity-50"></i>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                    <div class="stat-card bg-success">
+                        <div>
+                            <div class="stat-number" id="statActiveCustomers">0</div>
+                            <div class="stat-label">Active Customers</div>
+                        </div>
+                        <i class="bi bi-person-check-fill fs-1 opacity-50"></i>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                    <div class="stat-card bg-danger">
+                        <div>
+                            <div class="stat-number" id="statInactiveCustomers">0</div>
+                            <div class="stat-label">Deactivated Customers</div>
+                        </div>
+                        <i class="bi bi-person-x-fill fs-1 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add/Edit Customer Card -->
+            <div class="card">
+                <div class="card-body p-4">
+                    <h4 id="customerFormTitle" class="mb-3">Add / Register New Customer</h4>
+                    <form id="customerForm">
+                        <input type="hidden" id="customerUserId">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label for="customerFirstName" class="form-label">First Name *</label>
+                                <input type="text" id="customerFirstName" class="form-control" required maxlength="100" placeholder="e.g. Zeenat">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="customerLastName" class="form-label">Last Name</label>
+                                <input type="text" id="customerLastName" class="form-control" maxlength="100" placeholder="e.g. Ansari">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="customerEmail" class="form-label">Email Address *</label>
+                                <input type="email" id="customerEmail" class="form-control" required maxlength="100" placeholder="zeenat@example.com">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="customerPhone" class="form-label">Phone Number</label>
+                                <input type="text" id="customerPhone" class="form-control" maxlength="15" placeholder="+91 9876543210">
+                            </div>
+                            <div class="col-12 d-flex justify-content-end gap-2">
+                                <button type="button" id="customerCancelBtn" class="btn btn-outline-secondary d-none" onclick="resetCustomerForm()">Cancel</button>
+                                <button type="submit" class="btn btn-primary px-4">Save Customer</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Customer Dashboard Table Card -->
+            <div class="card">
+                <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <h5 class="mb-0"><i class="bi bi-person-lines-fill me-2"></i>Customer Dashboard</h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <!-- Status Filter -->
+                        <div class="btn-group btn-group-sm" role="group" id="customerFilterGroup">
+                            <button type="button" class="btn btn-outline-secondary filter-btn active" onclick="filterCustomers('ALL', this)">All</button>
+                            <button type="button" class="btn btn-outline-secondary filter-btn" onclick="filterCustomers('ACTIVE', this)">Active</button>
+                            <button type="button" class="btn btn-outline-secondary filter-btn" onclick="filterCustomers('INACTIVE', this)">Inactive</button>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" onclick="loadCustomers()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Customer Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Total Orders</th>
+                            <th>Total Spent</th>
+                            <th>Registered At</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="customersTableBody">
+                        <tr>
+                            <td colspan="9" class="empty-state">Loading customers...</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- TAB 2: ORDER MANAGEMENT MODULE -->
+        <!-- ============================================================== -->
+        <div class="tab-pane fade" id="orders-pane" role="tabpanel">
 
             <!-- Order Stats Row -->
             <div class="row g-3 mb-4">
@@ -224,7 +336,6 @@
             <div class="card">
                 <div class="card-body p-3">
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-                        <!-- Status Filter Buttons -->
                         <div class="btn-group" role="group" id="orderFilterGroup">
                             <button type="button" class="btn btn-outline-secondary filter-btn active" onclick="filterOrders('ALL', this)">All</button>
                             <button type="button" class="btn btn-outline-secondary filter-btn" onclick="filterOrders('Pending', this)">Pending</button>
@@ -233,7 +344,6 @@
                             <button type="button" class="btn btn-outline-secondary filter-btn" onclick="filterOrders('Cancelled', this)">Cancelled</button>
                         </div>
 
-                        <!-- Place Order Button -->
                         <button class="btn btn-primary d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#placeOrderModal" onclick="openPlaceOrderModal()">
                             <i class="bi bi-cart-plus-fill"></i> Place New Order (Shopping Cart)
                         </button>
@@ -273,7 +383,7 @@
         </div>
 
         <!-- ============================================================== -->
-        <!-- TAB 2: PRODUCT MANAGEMENT MODULE -->
+        <!-- TAB 3: PRODUCT MANAGEMENT MODULE -->
         <!-- ============================================================== -->
         <div class="tab-pane fade" id="products-pane" role="tabpanel">
             <div class="card">
@@ -347,7 +457,7 @@
         </div>
 
         <!-- ============================================================== -->
-        <!-- TAB 3: CATEGORY MANAGEMENT MODULE -->
+        <!-- TAB 4: CATEGORY MANAGEMENT MODULE -->
         <!-- ============================================================== -->
         <div class="tab-pane fade" id="categories-pane" role="tabpanel">
             <div class="card">
@@ -404,6 +514,65 @@
 </main>
 
 <!-- ============================================================== -->
+<!-- MODAL: CUSTOMER ORDER HISTORY -->
+<!-- ============================================================== -->
+<div class="modal fade" id="customerOrdersModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-clock-history me-2"></i>Customer Order History: <span id="custModalName"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded text-center">
+                            <small class="text-muted d-block">Customer Email</small>
+                            <strong id="custModalEmail">-</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded text-center">
+                            <small class="text-muted d-block">Total Orders</small>
+                            <strong id="custModalOrdersCount" class="fs-5 text-primary">0</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded text-center">
+                            <small class="text-muted d-block">Lifetime Spend</small>
+                            <strong id="custModalTotalSpend" class="fs-5 text-success">$0.00</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive border rounded">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Address</th>
+                            <th>Total</th>
+                            <th>Order Status</th>
+                            <th>Active Status</th>
+                            <th>Date</th>
+                        </tr>
+                        </thead>
+                        <tbody id="custOrdersTableBody">
+                        <tr>
+                            <td colspan="6" class="empty-state">Loading orders...</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================== -->
 <!-- MODAL: PLACE AN ORDER (SHOPPING CART) -->
 <!-- ============================================================== -->
 <div class="modal fade" id="placeOrderModal" tabindex="-1" aria-labelledby="placeOrderModalLabel" aria-hidden="true">
@@ -415,6 +584,16 @@
             </div>
             <div class="modal-body p-4">
                 <form id="placeOrderForm">
+                    <!-- Customer Selection / Quick Autofill -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-primary"><i class="bi bi-person-check me-1"></i>Select Registered Customer (Optional Autofill)</label>
+                            <select id="orderCustomerSelect" class="form-select" onchange="autofillCustomer(this.value)">
+                                <option value="">-- Or enter customer details below --</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <!-- Customer Information -->
                     <h6 class="fw-bold text-primary mb-3"><i class="bi bi-person me-2"></i>Customer Information</h6>
                     <div class="row g-3 mb-4">
@@ -522,9 +701,7 @@
                 <h5 class="modal-title"><i class="bi bi-receipt me-2"></i>Order Details #<span id="modalOrderId"></span></h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body p-4" id="orderDetailsContent">
-                <!-- Injected by JavaScript -->
-            </div>
+            <div class="modal-body p-4" id="orderDetailsContent"></div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
@@ -568,16 +745,19 @@
 
 <script>
     // Global state
+    let cachedCustomers = [];
     let cachedProducts = [];
     let cachedCategories = [];
     let cachedOrders = [];
     let cartItems = [];
-    let currentStatusFilter = "ALL";
+    let currentOrderStatusFilter = "ALL";
+    let currentCustomerStatusFilter = "ALL";
 
     // -------------------------------------------------------------
     // INITIALIZATION
     // -------------------------------------------------------------
     document.addEventListener("DOMContentLoaded", () => {
+        loadCustomers();
         loadOrders();
         loadProducts();
         loadCategories();
@@ -601,13 +781,217 @@
     }
 
     // =============================================================
-    // 1. ORDER MANAGEMENT LOGIC
+    // 1. CUSTOMER MANAGEMENT LOGIC
+    // =============================================================
+    async function loadCustomers() {
+        const tbody = document.getElementById("customersTableBody");
+        try {
+            let url = "/api/customers";
+            if (currentCustomerStatusFilter === "ACTIVE") url += "?status=true";
+            else if (currentCustomerStatusFilter === "INACTIVE") url += "?status=false";
+
+            const res = await fetch(url);
+            if (!res.ok) throw new Error("Failed to load customers");
+            const customers = await res.json();
+            cachedCustomers = customers;
+
+            updateCustomerStats(customers);
+            renderCustomersTable(customers);
+            populateCustomerSelect(customers);
+        } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="9" class="empty-state text-danger">Error loading customers: ${err.message}</td></tr>`;
+        }
+    }
+
+    async function updateCustomerStats(filtered) {
+        let all = filtered;
+        if (currentCustomerStatusFilter !== "ALL") {
+            try {
+                const res = await fetch("/api/customers");
+                all = await res.json();
+            } catch (e) {}
+        }
+        document.getElementById("statTotalCustomers").textContent = all.length;
+        document.getElementById("statActiveCustomers").textContent = all.filter(c => c.status).length;
+        document.getElementById("statInactiveCustomers").textContent = all.filter(c => !c.status).length;
+    }
+
+    function filterCustomers(filter, btn) {
+        currentCustomerStatusFilter = filter;
+        document.querySelectorAll("#customerFilterGroup .filter-btn").forEach(b => b.classList.remove("active"));
+        if (btn) btn.classList.add("active");
+        loadCustomers();
+    }
+
+    function renderCustomersTable(customers) {
+        const tbody = document.getElementById("customersTableBody");
+        if (!customers || customers.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" class="empty-state">No customers found.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = customers.map(c => `
+            <tr>
+                <td><strong>#${c.userId}</strong></td>
+                <td><strong>${escapeText(c.fullName)}</strong></td>
+                <td>${escapeText(c.email)}</td>
+                <td>${escapeText(c.phone || "-")}</td>
+                <td>
+                    <span class="badge ${c.status ? 'bg-success' : 'bg-secondary'}">
+                        ${c.status ? 'Active' : 'Inactive'}
+                    </span>
+                </td>
+                <td><span class="badge bg-light text-dark border">${c.orderCount} order(s)</span></td>
+                <td><strong class="text-primary">$${Number(c.totalSpent || 0).toFixed(2)}</strong></td>
+                <td><small class="text-muted">${c.createdAt ? new Date(c.createdAt).toLocaleDateString() : "-"}</small></td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-info" title="View Order History" onclick="viewCustomerOrders(${c.userId})">
+                            <i class="bi bi-clock-history"></i>
+                        </button>
+                        <button class="btn btn-outline-primary" title="Edit Customer" onclick="editCustomer(${c.userId})">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        ${c.status ? `
+                            <button class="btn btn-outline-danger" title="Deactivate (Soft Delete)" onclick="toggleCustomerStatus(${c.userId}, false)">
+                                <i class="bi bi-person-x"></i>
+                            </button>
+                        ` : `
+                            <button class="btn btn-outline-success" title="Activate Account" onclick="toggleCustomerStatus(${c.userId}, true)">
+                                <i class="bi bi-person-check"></i>
+                            </button>
+                        `}
+                    </div>
+                </td>
+            </tr>
+        `).join("");
+    }
+
+    document.getElementById("customerForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const id = document.getElementById("customerUserId").value;
+        const payload = {
+            firstName: document.getElementById("customerFirstName").value.trim(),
+            lastName: document.getElementById("customerLastName").value.trim(),
+            email: document.getElementById("customerEmail").value.trim(),
+            phone: document.getElementById("customerPhone").value.trim()
+        };
+
+        const method = id ? "PUT" : "POST";
+        const url = id ? `/api/customers/${id}` : "/api/customers";
+
+        try {
+            const res = await fetch(url, {
+                method,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Failed to save customer");
+
+            showMessage(id ? "Customer details updated successfully!" : "New customer registered successfully!", "success");
+            resetCustomerForm();
+            loadCustomers();
+        } catch (err) {
+            showMessage(err.message, "danger");
+        }
+    });
+
+    function editCustomer(id) {
+        const c = cachedCustomers.find(item => item.userId === id);
+        if (!c) return;
+        document.getElementById("customerUserId").value = c.userId;
+        document.getElementById("customerFirstName").value = c.firstName || "";
+        document.getElementById("customerLastName").value = c.lastName || "";
+        document.getElementById("customerEmail").value = c.email || "";
+        document.getElementById("customerPhone").value = c.phone || "";
+        document.getElementById("customerFormTitle").textContent = "Update Customer Details";
+        document.getElementById("customerCancelBtn").classList.remove("d-none");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function toggleCustomerStatus(id, activate) {
+        const action = activate ? "activate" : "deactivate";
+        const promptText = activate ? "Reactivate this customer account?" : "Deactivate this customer account? Soft delete will preserve order history.";
+        if (!confirm(promptText)) return;
+
+        try {
+            const res = await fetch(`/api/customers/${id}/${action}`, { method: "PUT" });
+            if (!res.ok) throw new Error(`Could not ${action} customer`);
+            showMessage(`Customer account ${action}d successfully.`, "success");
+            loadCustomers();
+        } catch (err) {
+            showMessage(err.message, "danger");
+        }
+    }
+
+    function resetCustomerForm() {
+        document.getElementById("customerForm").reset();
+        document.getElementById("customerUserId").value = "";
+        document.getElementById("customerFormTitle").textContent = "Add / Register New Customer";
+        document.getElementById("customerCancelBtn").classList.add("d-none");
+    }
+
+    async function viewCustomerOrders(id) {
+        try {
+            const res = await fetch(`/api/customers/${id}/orders`);
+            if (!res.ok) throw new Error("Could not load customer order history");
+            const data = await res.json();
+
+            document.getElementById("custModalName").textContent = data.fullName;
+            document.getElementById("custModalEmail").textContent = data.email;
+            document.getElementById("custModalOrdersCount").textContent = data.orderCount;
+            document.getElementById("custModalTotalSpend").textContent = `$${Number(data.totalSpent || 0).toFixed(2)}`;
+
+            const tbody = document.getElementById("custOrdersTableBody");
+            if (!data.orders || data.orders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">No orders placed by this customer yet.</td></tr>`;
+            } else {
+                tbody.innerHTML = data.orders.map(o => `
+                    <tr>
+                        <td><strong>#${o.id}</strong></td>
+                        <td><small>${escapeText(o.shippingAddress)}</small></td>
+                        <td><strong>$${Number(o.totalAmount).toFixed(2)}</strong></td>
+                        <td><span class="badge ${getStatusBadgeClass(o.orderStatus)}">${o.orderStatus}</span></td>
+                        <td><span class="badge ${o.status ? 'bg-success-subtle text-success border border-success' : 'bg-danger-subtle text-danger border border-danger'}">${o.status ? 'Active' : 'Cancelled'}</span></td>
+                        <td><small class="text-muted">${o.createdAt ? new Date(o.createdAt).toLocaleDateString() : "-"}</small></td>
+                    </tr>
+                `).join("");
+            }
+
+            new bootstrap.Modal(document.getElementById("customerOrdersModal")).show();
+        } catch (err) {
+            alert(err.message);
+        }
+    }
+
+    function populateCustomerSelect(customers) {
+        const sel = document.getElementById("orderCustomerSelect");
+        sel.innerHTML = '<option value="">-- Or enter customer details manually below --</option>';
+        customers.filter(c => c.status).forEach(c => {
+            sel.innerHTML += `<option value="${c.userId}" data-name="${escapeText(c.fullName)}" data-email="${escapeText(c.email)}" data-phone="${escapeText(c.phone || '')}">
+                ${escapeText(c.fullName)} (${escapeText(c.email)})
+            </option>`;
+        });
+    }
+
+    function autofillCustomer(userId) {
+        if (!userId) return;
+        const sel = document.getElementById("orderCustomerSelect");
+        const opt = sel.options[sel.selectedIndex];
+        document.getElementById("orderCustomerName").value = opt.getAttribute("data-name");
+        document.getElementById("orderCustomerEmail").value = opt.getAttribute("data-email");
+        document.getElementById("orderCustomerPhone").value = opt.getAttribute("data-phone") || "";
+    }
+
+    // =============================================================
+    // 2. ORDER MANAGEMENT LOGIC
     // =============================================================
     async function loadOrders() {
         const tableBody = document.getElementById("ordersTableBody");
         try {
-            const url = currentStatusFilter && currentStatusFilter !== "ALL"
-                ? `/api/orders?status=${encodeURIComponent(currentStatusFilter)}`
+            const url = currentOrderStatusFilter && currentOrderStatusFilter !== "ALL"
+                ? `/api/orders?status=${encodeURIComponent(currentOrderStatusFilter)}`
                 : "/api/orders";
 
             const res = await fetch(url);
@@ -623,15 +1007,13 @@
     }
 
     async function updateOrderStats(filteredOrders) {
-        // Fetch full list for stats if needed
         let allList = filteredOrders;
-        if (currentStatusFilter !== "ALL") {
+        if (currentOrderStatusFilter !== "ALL") {
             try {
                 const res = await fetch("/api/orders");
                 allList = await res.json();
             } catch (e) {}
         }
-
         document.getElementById("statTotalOrders").textContent = allList.length;
         document.getElementById("statPendingOrders").textContent = allList.filter(o => o.orderStatus === "Pending").length;
         document.getElementById("statShippedOrders").textContent = allList.filter(o => o.orderStatus === "Shipped").length;
@@ -639,7 +1021,7 @@
     }
 
     function filterOrders(status, btnElement) {
-        currentStatusFilter = status;
+        currentOrderStatusFilter = status;
         document.querySelectorAll("#orderFilterGroup .filter-btn").forEach(btn => btn.classList.remove("active"));
         if (btnElement) btnElement.classList.add("active");
         loadOrders();
@@ -707,7 +1089,6 @@
         }
     }
 
-    // Modal: Open Place Order
     function openPlaceOrderModal() {
         cartItems = [];
         updateCartDisplay();
@@ -803,7 +1184,6 @@
         document.getElementById("cartGrandTotal").textContent = `$${grandTotal.toFixed(2)}`;
     }
 
-    // Place Order Submission
     document.getElementById("placeOrderForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         if (cartItems.length === 0) {
@@ -811,7 +1191,10 @@
             return;
         }
 
+        const selectedCustId = document.getElementById("orderCustomerSelect").value;
+
         const payload = {
+            userId: selectedCustId ? Number(selectedCustId) : null,
             customerName: document.getElementById("orderCustomerName").value.trim(),
             customerEmail: document.getElementById("orderCustomerEmail").value.trim(),
             customerPhone: document.getElementById("orderCustomerPhone").value.trim(),
@@ -839,13 +1222,13 @@
 
             showMessage(`Order #${data.id} placed successfully! Total: $${Number(data.totalAmount).toFixed(2)}`, "success");
             loadOrders();
-            loadProducts(); // refresh inventory
+            loadProducts();
+            loadCustomers();
         } catch (err) {
             alert(err.message);
         }
     });
 
-    // View Order Details Modal
     async function viewOrderDetails(id) {
         try {
             const res = await fetch(`/api/orders/${id}`);
@@ -929,7 +1312,6 @@
         }
     }
 
-    // Modal: Open Update Order Status
     function openUpdateStatusModal(id, currentStatus) {
         document.getElementById("updateOrderId").value = id;
         document.getElementById("updateOrderDisplayId").textContent = id;
@@ -960,7 +1342,6 @@
         }
     }
 
-    // Cancel Order (Soft delete)
     async function cancelOrder(id) {
         if (!confirm(`Are you sure you want to cancel Order #${id}? Soft delete will set status to 'Cancelled' and restore product inventory.`)) {
             return;
@@ -974,13 +1355,14 @@
             showMessage(`Order #${id} has been cancelled (soft deleted) and inventory restored.`, "warning");
             loadOrders();
             loadProducts();
+            loadCustomers();
         } catch (err) {
             alert(err.message);
         }
     }
 
     // =============================================================
-    // 2. PRODUCT MANAGEMENT LOGIC
+    // 3. PRODUCT MANAGEMENT LOGIC
     // =============================================================
     async function loadProducts() {
         try {
@@ -1101,7 +1483,7 @@
     }
 
     // =============================================================
-    // 3. CATEGORY MANAGEMENT LOGIC
+    // 4. CATEGORY MANAGEMENT LOGIC
     // =============================================================
     async function loadCategories() {
         try {

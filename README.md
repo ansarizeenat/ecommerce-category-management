@@ -10,55 +10,76 @@ A full-featured Spring Boot and MySQL web application and REST API developed as 
 
 ## Modules Overview
 
-### 1. Category Management Module
+### 1. Customer Management Module (New)
+- **Add / Register Customer:** Self-registration through frontend or manual creation via admin dashboard with unique email validation.
+- **Customer Dashboard:** Real-time customer metrics (Total, Active, Deactivated), status filtering (`All`, `Active`, `Inactive`).
+- **Customer Order History:** Admins can view complete order history, line items, and lifetime spend for every customer.
+- **Update Customer Details:** Edit names, email addresses, phone numbers, and status.
+- **Soft-Delete Deactivation:** Deactivate customer accounts (`status = false`) while safely retaining order history. Re-enable with one click.
+- **PDF Documentation:** `Customer_Management_Module_End_User_Documentation.pdf`.
+
+### 2. Order Management Module
+- **Place an Order:** Customers select products and add to shopping cart. Automatic live calculation of subtotal, tax (5%), shipping cost, and grand total. Inventory is deducted automatically.
+- **Order Dashboard:** Admins view all orders with status filters (`All`, `Pending`, `Shipped`, `Delivered`, `Cancelled`).
+- **Update Order Status:** Admins transition orders (`Pending` -> `Shipped` -> `Delivered`).
+- **Cancel Order (Soft Delete):** Orders can be cancelled if not yet shipped (`Pending` only). Changes status to `Cancelled` and `status` to `false`, with automatic inventory restock.
+- **PDF Documentation:** `Order_Management_Module_End_User_Documentation.pdf`.
+
+### 3. Product Management Module
+- Add, update, view, and deactivate products.
+- Inventory tracking, SKU management, price definitions, and category mapping.
+
+### 4. Category Management Module
 - Create, view, update, and soft-delete product categories.
 - Tracks created/updated timestamps automatically.
 - Prevents deactivation of categories that contain active products.
 
-### 2. Product Management Module
-- Add, update, view, and deactivate products.
-- Inventory tracking, SKU management, price definitions, and category mapping.
-
-### 3. Order Management Module (Latest)
-- **Place an Order:** Customers select products and add to shopping cart. Real-time automatic calculation of subtotal, tax (5%), shipping cost, and grand total. Product inventory is deducted upon order placement.
-- **Order Dashboard:** Admins view all customer orders, with quick status filters (`All`, `Pending`, `Shipped`, `Delivered`, `Cancelled`).
-- **Update Order Status:** Admins can transition order lifecycle (`Pending` -> `Shipped` -> `Delivered`).
-- **Cancel Order (Soft Delete):** Customers and admins can cancel orders before shipment (`Pending` orders only). Changes status to `Cancelled` and `status` to `false`. Automatically restores product quantities to inventory.
-- **Comprehensive End User Documentation:** Available in PDF format (`Order_Management_Module_End_User_Documentation.pdf`).
-
 ---
 
-## Tech Stack
+## Database Design
 
-- **Java:** 25
-- **Framework:** Spring Boot 4.1.1 / 3.x (Spring Web MVC, Spring Data JPA, Thymeleaf, Validation)
-- **Database:** MySQL 8.0 (Local & Cloud MySQL for Production)
-- **Frontend:** HTML5, Bootstrap 5.3, Bootstrap Icons, JavaScript
-- **Build Tool:** Maven 3.9 (`mvnw`)
-- **Deployment:** Docker, Render Cloud Platform
+### Table: `users`
+| Column | Datatype | Constraint | Description |
+|---|---|---|---|
+| `user_id` | `BIGINT` | PK, Auto Increment | Unique identifier for each customer |
+| `first_name` | `VARCHAR(100)` | NOT NULL | Customer's first name |
+| `last_name` | `VARCHAR(100)` | NULLABLE | Customer's last name |
+| `email` | `VARCHAR(100)` | NOT NULL, UNIQUE | Customer's email address |
+| `phone` | `VARCHAR(15)` | NULLABLE | Customer's phone number |
+| `created_at` | `DATETIME` | NOT NULL | Timestamp when account was created |
+| `updated_at` | `DATETIME` | NOT NULL | Timestamp when account was updated |
+| `status` | `BOOLEAN` | NOT NULL | `true` for active, `false` for inactive (soft delete) |
 
----
-
-## Database Design: `orders`
-
+### Table: `orders`
 | Column | Datatype | Constraint | Description |
 |---|---|---|---|
 | `id` | `BIGINT` | PK, Auto Increment | Unique identifier for each order |
-| `user_id` | `BIGINT` | FK (`users.id`) | Foreign key referencing the users table |
-| `customer_name` | `VARCHAR(100)` | NOT NULL | Display name of customer |
-| `total_amount` | `DECIMAL(10,2)` | NOT NULL | Total cost of order (Subtotal + Tax + Shipping) |
-| `subtotal` | `DECIMAL(10,2)` | NOT NULL | Item subtotal |
+| `user_id` | `BIGINT` | FK (`users.user_id`) | References the customer |
+| `customer_name` | `VARCHAR(100)` | NOT NULL | Customer display name |
+| `total_amount` | `DECIMAL(10,2)` | NOT NULL | Grand total (Subtotal + Tax + Shipping) |
+| `subtotal` | `DECIMAL(10,2)` | NOT NULL | Items subtotal |
 | `tax_amount` | `DECIMAL(10,2)` | NOT NULL | 5% Tax |
 | `shipping_cost` | `DECIMAL(10,2)` | NOT NULL | Shipping fee |
 | `order_status` | `VARCHAR(50)` | NOT NULL | Status (`Pending`, `Shipped`, `Delivered`, `Cancelled`) |
 | `shipping_address`| `VARCHAR(300)` | NOT NULL | Delivery address |
-| `created_at` | `DATETIME` | NOT NULL | Timestamp when order was placed |
-| `updated_at` | `DATETIME` | NOT NULL | Timestamp when status was updated |
-| `status` | `BOOLEAN` | NOT NULL | `true` for active orders, `false` for cancelled (soft delete) |
+| `created_at` | `DATETIME` | NOT NULL | Timestamp when placed |
+| `updated_at` | `DATETIME` | NOT NULL | Timestamp when updated |
+| `status` | `BOOLEAN` | NOT NULL | `true` for active, `false` for cancelled |
 
 ---
 
 ## API Endpoints Summary
+
+### Customer Management (`/api/customers`)
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `POST` | `/api/customers` | Register / create customer |
+| `GET` | `/api/customers` | Get all customers (supports `?status=true/false`) |
+| `GET` | `/api/customers/{id}` | Get customer by ID |
+| `GET` | `/api/customers/{id}/orders` | Get customer profile with full order history |
+| `PUT` | `/api/customers/{id}` | Update customer details |
+| `DELETE` / `PUT` | `/api/customers/{id}` / `/api/customers/{id}/deactivate` | Deactivate customer (soft delete) |
+| `PUT` | `/api/customers/{id}/activate` | Reactivate customer account |
 
 ### Order Management (`/api/orders`)
 | Method | Endpoint | Purpose |
@@ -68,7 +89,6 @@ A full-featured Spring Boot and MySQL web application and REST API developed as 
 | `GET` | `/api/orders/{id}` | Get detailed order by ID |
 | `PUT` | `/api/orders/{id}/status` | Update order status (`Pending`, `Shipped`, `Delivered`, `Cancelled`) |
 | `DELETE` / `PUT` | `/api/orders/{id}` / `/api/orders/{id}/cancel` | Soft-delete cancel order (restocks inventory) |
-| `GET` | `/api/orders/users` | List registered customers |
 
 ### Product Management (`/products`)
 | Method | Endpoint | Purpose |
