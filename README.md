@@ -34,6 +34,12 @@ A full-featured Spring Boot and MySQL web application and REST API developed as 
 - Tracks created/updated timestamps automatically.
 - Prevents deactivation of categories that contain active products.
 
+### 5. Payment Management Module
+- **Process Payment:** Charge an unpaid order through a simulated Stripe, PayPal, or bank-transfer gateway. Methods: Credit Card, Debit Card, PayPal, Bank Transfer.
+- **Payment Dashboard:** Admins view Payment ID, order, customer, amount, method, status (`Paid`, `Failed`, `Refunded`), gateway transaction ID, and timestamps. Status filters and revenue stats are included.
+- **Refund Payment:** Admins refund a `Paid` transaction for cancelled or returned orders. The refund is logged and the linked order is cancelled.
+- **PDF Documentation:** `Payment_Management_Module_End_User_Documentation.pdf`.
+
 ---
 
 ## Database Design
@@ -65,6 +71,17 @@ A full-featured Spring Boot and MySQL web application and REST API developed as 
 | `created_at` | `DATETIME` | NOT NULL | Timestamp when placed |
 | `updated_at` | `DATETIME` | NOT NULL | Timestamp when updated |
 | `status` | `BOOLEAN` | NOT NULL | `true` for active, `false` for cancelled |
+
+### Table: `payments`
+| Column | Datatype | Constraint | Description |
+|---|---|---|---|
+| `payment_id` | `INT / BIGINT` | PK, Auto Increment | Unique identifier for each payment |
+| `order_id` | `INT / BIGINT` | FK (`orders.id`) | References the paid order |
+| `amount` | `DECIMAL(10,2)` | NOT NULL | Amount paid |
+| `payment_method` | `VARCHAR(50)` | NOT NULL | Credit Card, Debit Card, PayPal, Bank Transfer |
+| `payment_status` | `VARCHAR(50)` | NOT NULL | `Paid`, `Failed`, or `Refunded` |
+| `created_at` | `DATETIME` | NOT NULL | When the payment was processed |
+| `updated_at` | `DATETIME` | NOT NULL | When the payment was last updated |
 
 ---
 
@@ -106,6 +123,16 @@ A full-featured Spring Boot and MySQL web application and REST API developed as 
 | `POST` | `/api/categories` | Create a category |
 | `PUT` | `/api/categories/{id}` | Update category |
 | `DELETE` | `/api/categories/{id}` | Soft delete category |
+
+### Payment Management (`/api/payments`)
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `POST` | `/api/payments` | Process payment for an order (gateway simulation) |
+| `GET` | `/api/payments` | Transaction history (supports `?status=Paid`) |
+| `GET` | `/api/payments/stats` | Revenue, paid, failed, and refunded totals |
+| `GET` | `/api/payments/{id}` | Get payment by ID |
+| `GET` | `/api/payments/order/{orderId}` | Latest payment for an order |
+| `POST` | `/api/payments/{id}/refund` | Refund a paid payment and cancel the order |
 
 ---
 

@@ -120,6 +120,21 @@
             color: #fff;
         }
 
+        .badge-paid {
+            background-color: #198754;
+            color: #fff;
+        }
+
+        .badge-failed {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .badge-refunded {
+            background-color: #6f42c1;
+            color: #fff;
+        }
+
         .empty-state {
             padding: 40px;
             text-align: center;
@@ -174,6 +189,11 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="categories-tab" data-bs-toggle="tab" data-bs-target="#categories-pane" type="button" role="tab">
                 <i class="bi bi-tags-fill me-1"></i> Category Management
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="payments-tab" data-bs-toggle="tab" data-bs-target="#payments-pane" type="button" role="tab">
+                <i class="bi bi-credit-card-2-front-fill me-1"></i> Payment Management
             </button>
         </li>
     </ul>
@@ -510,6 +530,130 @@
             </div>
         </div>
 
+        <!-- ============================================================== -->
+        <!-- TAB 5: PAYMENT MANAGEMENT MODULE -->
+        <!-- ============================================================== -->
+        <div class="tab-pane fade" id="payments-pane" role="tabpanel">
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card bg-success">
+                        <div>
+                            <div class="stat-number" id="statPaymentRevenue">$0.00</div>
+                            <div class="stat-label">Collected (Paid)</div>
+                        </div>
+                        <i class="bi bi-cash-stack fs-1 opacity-50"></i>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card bg-primary">
+                        <div>
+                            <div class="stat-number" id="statPaymentPaidCount">0</div>
+                            <div class="stat-label">Paid Transactions</div>
+                        </div>
+                        <i class="bi bi-check2-circle fs-1 opacity-50"></i>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card" style="background-color: #6f42c1;">
+                        <div>
+                            <div class="stat-number" id="statPaymentRefunded">$0.00</div>
+                            <div class="stat-label">Refunded Amount</div>
+                        </div>
+                        <i class="bi bi-arrow-counterclockwise fs-1 opacity-50"></i>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card bg-danger">
+                        <div>
+                            <div class="stat-number" id="statPaymentFailedCount">0</div>
+                            <div class="stat-label">Failed Payments</div>
+                        </div>
+                        <i class="bi bi-x-octagon fs-1 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body p-4">
+                    <h4 class="mb-3">Process Payment (Stripe / PayPal / Bank)</h4>
+                    <p class="text-muted mb-3">Payments are processed through a simulated third-party gateway. Each attempt is stored with Payment ID, amount, method, and status (Paid, Failed, Refunded).</p>
+                    <form id="paymentForm">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="paymentOrderSelect" class="form-label">Order *</label>
+                                <select id="paymentOrderSelect" class="form-select" required>
+                                    <option value="">Select an unpaid order...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="paymentMethodSelect" class="form-label">Payment Method *</label>
+                                <select id="paymentMethodSelect" class="form-select" required>
+                                    <option value="Credit Card">Credit Card (Stripe)</option>
+                                    <option value="Debit Card">Debit Card (Stripe)</option>
+                                    <option value="PayPal">PayPal</option>
+                                    <option value="Bank Transfer">Bank Transfer</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="paymentCardDetails" class="form-label">Card / Account (optional)</label>
+                                <input type="text" id="paymentCardDetails" class="form-control" maxlength="19" placeholder="4242... success, ...0002 fail">
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="paymentSimulateFail">
+                                    <label class="form-check-label" for="paymentSimulateFail">Simulate fail</label>
+                                </div>
+                            </div>
+                            <div class="col-12 d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="bi bi-lock-fill me-1"></i> Charge Gateway
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <h5 class="mb-0"><i class="bi bi-receipt-cutoff me-2"></i>Payment Dashboard</h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="btn-group btn-group-sm" role="group" id="paymentFilterGroup">
+                            <button type="button" class="btn btn-outline-secondary filter-btn active" onclick="filterPayments('ALL', this)">All</button>
+                            <button type="button" class="btn btn-outline-secondary filter-btn" onclick="filterPayments('Paid', this)">Paid</button>
+                            <button type="button" class="btn btn-outline-secondary filter-btn" onclick="filterPayments('Failed', this)">Failed</button>
+                            <button type="button" class="btn btn-outline-secondary filter-btn" onclick="filterPayments('Refunded', this)">Refunded</button>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" onclick="loadPayments()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                        <tr>
+                            <th>Payment ID</th>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Payment Method</th>
+                            <th>Status</th>
+                            <th>Gateway Txn ID</th>
+                            <th>Refund Reason</th>
+                            <th>Processed At</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="paymentsTableBody">
+                        <tr>
+                            <td colspan="10" class="empty-state">Loading payments...</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 </main>
 
@@ -749,9 +893,11 @@
     let cachedProducts = [];
     let cachedCategories = [];
     let cachedOrders = [];
+    let cachedPayments = [];
     let cartItems = [];
     let currentOrderStatusFilter = "ALL";
     let currentCustomerStatusFilter = "ALL";
+    let currentPaymentStatusFilter = "ALL";
 
     // -------------------------------------------------------------
     // INITIALIZATION
@@ -761,6 +907,7 @@
         loadOrders();
         loadProducts();
         loadCategories();
+        loadPayments();
     });
 
     // Global Message Alert
@@ -1039,6 +1186,8 @@
             const formattedDate = order.createdAt ? new Date(order.createdAt).toLocaleString() : "-";
             const itemCount = order.items ? order.items.length : 0;
             const canCancel = order.orderStatus === "Pending" && order.status !== false;
+            const isPaid = isOrderPaid(order.id);
+            const canPay = !isPaid && order.status !== false && order.orderStatus !== "Cancelled";
 
             return `
                 <tr>
@@ -1055,6 +1204,7 @@
                         <span class="badge ${order.status ? 'bg-success-subtle text-success border border-success' : 'bg-danger-subtle text-danger border border-danger'}">
                             ${order.status ? 'Active' : 'Cancelled'}
                         </span>
+                        ${isPaid ? '<span class="badge badge-paid ms-1">Paid</span>' : '<span class="badge bg-secondary ms-1">Unpaid</span>'}
                     </td>
                     <td><small class="text-muted">${formattedDate}</small></td>
                     <td>
@@ -1062,6 +1212,11 @@
                             <button class="btn btn-outline-primary" title="View Details" onclick="viewOrderDetails(${order.id})">
                                 <i class="bi bi-eye"></i>
                             </button>
+                            ${canPay ? `
+                                <button class="btn btn-outline-success" title="Process Payment" onclick="openPaymentForOrder(${order.id})">
+                                    <i class="bi bi-credit-card"></i>
+                                </button>
+                            ` : ''}
                             ${order.orderStatus !== 'Cancelled' ? `
                                 <button class="btn btn-outline-secondary" title="Update Status" onclick="openUpdateStatusModal(${order.id}, '${order.orderStatus}')">
                                     <i class="bi bi-pencil"></i>
@@ -1596,6 +1751,172 @@
         document.getElementById("categoryId").value = "";
         document.getElementById("categoryFormTitle").textContent = "Add New Category";
         document.getElementById("categoryCancelBtn").classList.add("d-none");
+    }
+
+    // =============================================================
+    // 5. PAYMENT MANAGEMENT LOGIC
+    // =============================================================
+    function isOrderPaid(orderId) {
+        return cachedPayments.some(p => p.orderId === orderId && String(p.paymentStatus).toLowerCase() === "paid");
+    }
+
+    function getPaymentBadgeClass(status) {
+        switch (status) {
+            case "Paid": return "badge-paid";
+            case "Failed": return "badge-failed";
+            case "Refunded": return "badge-refunded";
+            default: return "bg-secondary text-white";
+        }
+    }
+
+    async function loadPayments() {
+        const tbody = document.getElementById("paymentsTableBody");
+        try {
+            const url = currentPaymentStatusFilter && currentPaymentStatusFilter !== "ALL"
+                ? `/api/payments?status=${encodeURIComponent(currentPaymentStatusFilter)}`
+                : "/api/payments";
+            const res = await fetch(url);
+            if (!res.ok) throw new Error("Failed to load payments");
+            cachedPayments = await res.json();
+            await refreshPaymentStats();
+            renderPaymentsTable(cachedPayments);
+            populateUnpaidOrderSelect();
+            if (cachedOrders.length) renderOrdersTable(cachedOrders);
+        } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="9" class="empty-state text-danger">Error loading payments: ${err.message}</td></tr>`;
+        }
+    }
+
+    async function refreshPaymentStats() {
+        try {
+            const res = await fetch("/api/payments/stats");
+            if (!res.ok) return;
+            const stats = await res.json();
+            document.getElementById("statPaymentRevenue").textContent = `$${Number(stats.totalRevenue || 0).toFixed(2)}`;
+            document.getElementById("statPaymentPaidCount").textContent = stats.paidCount || 0;
+            document.getElementById("statPaymentRefunded").textContent = `$${Number(stats.totalRefunded || 0).toFixed(2)}`;
+            document.getElementById("statPaymentFailedCount").textContent = stats.failedCount || 0;
+        } catch (e) {}
+    }
+
+    function filterPayments(status, btn) {
+        currentPaymentStatusFilter = status;
+        document.querySelectorAll("#paymentFilterGroup .filter-btn").forEach(b => b.classList.remove("active"));
+        if (btn) btn.classList.add("active");
+        loadPayments();
+    }
+
+    function populateUnpaidOrderSelect() {
+        const sel = document.getElementById("paymentOrderSelect");
+        if (!sel) return;
+        const current = sel.value;
+        const unpaid = cachedOrders.filter(o => o.status !== false && o.orderStatus !== "Cancelled" && !isOrderPaid(o.id));
+        sel.innerHTML = '<option value="">Select an unpaid order...</option>';
+        unpaid.forEach(o => {
+            sel.innerHTML += `<option value="${o.id}">#${o.id} — ${escapeText(o.customerName)} — $${Number(o.totalAmount).toFixed(2)}</option>`;
+        });
+        if (current && unpaid.some(o => String(o.id) === String(current))) {
+            sel.value = current;
+        }
+    }
+
+    function openPaymentForOrder(orderId) {
+        const tab = document.getElementById("payments-tab");
+        if (tab) new bootstrap.Tab(tab).show();
+        populateUnpaidOrderSelect();
+        document.getElementById("paymentOrderSelect").value = String(orderId);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function renderPaymentsTable(payments) {
+        const tbody = document.getElementById("paymentsTableBody");
+        if (!payments || payments.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="10" class="empty-state">No payment records found.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = payments.map(p => {
+            const canRefund = String(p.paymentStatus).toLowerCase() === "paid";
+            return `
+                <tr>
+                    <td><strong>#${p.paymentId}</strong></td>
+                    <td>#${p.orderId}</td>
+                    <td>${escapeText(p.customerName || "-")}</td>
+                    <td><strong class="text-primary">$${Number(p.amount).toFixed(2)}</strong></td>
+                    <td>${escapeText(p.paymentMethod)}</td>
+                    <td><span class="badge ${getPaymentBadgeClass(p.paymentStatus)}">${escapeText(p.paymentStatus)}</span></td>
+                    <td><code>${escapeText(p.transactionId || "-")}</code></td>
+                    <td><small class="text-muted">${escapeText(p.refundReason || "-")}</small></td>
+                    <td><small class="text-muted">${p.createdAt ? new Date(p.createdAt).toLocaleString() : "-"}</small></td>
+                    <td>
+                        ${canRefund ? `
+                            <button class="btn btn-sm btn-outline-danger" title="Issue Refund" onclick="refundPayment(${p.paymentId})">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i>Refund
+                            </button>
+                        ` : '<span class="text-muted">-</span>'}
+                    </td>
+                </tr>
+            `;
+        }).join("");
+    }
+
+    document.getElementById("paymentForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const orderId = document.getElementById("paymentOrderSelect").value;
+        if (!orderId) {
+            showMessage("Please select an order to pay.", "warning");
+            return;
+        }
+
+        const payload = {
+            orderId: Number(orderId),
+            paymentMethod: document.getElementById("paymentMethodSelect").value,
+            cardDetails: document.getElementById("paymentCardDetails").value.trim(),
+            simulateFailure: document.getElementById("paymentSimulateFail").checked
+        };
+
+        try {
+            const res = await fetch("/api/payments", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Payment failed");
+
+            if (String(data.paymentStatus).toLowerCase() === "failed") {
+                showMessage(`Gateway declined payment for Order #${orderId}. Status logged as Failed. Txn: ${data.transactionId}`, "danger");
+            } else {
+                showMessage(`Payment #${data.paymentId} processed successfully via ${data.paymentMethod}. Txn: ${data.transactionId}`, "success");
+            }
+            document.getElementById("paymentForm").reset();
+            await loadPayments();
+            loadOrders();
+        } catch (err) {
+            showMessage(err.message, "danger");
+        }
+    });
+
+    async function refundPayment(id) {
+        const reason = prompt("Refund reason (cancelled or returned order):", "Order cancelled / returned");
+        if (reason === null) return;
+
+        try {
+            const res = await fetch(`/api/payments/${id}/refund`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ reason: reason || "Customer requested refund" })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Refund failed");
+
+            showMessage(`Payment #${id} refunded. Linked order was cancelled. Status: ${data.paymentStatus}`, "warning");
+            await loadPayments();
+            loadOrders();
+            loadCustomers();
+        } catch (err) {
+            showMessage(err.message, "danger");
+        }
     }
 </script>
 
