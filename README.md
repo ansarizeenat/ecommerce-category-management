@@ -40,6 +40,13 @@ A full-featured Spring Boot and MySQL web application and REST API developed as 
 - **Refund Payment:** Admins refund a `Paid` transaction for cancelled or returned orders. The refund is logged and the linked order is cancelled.
 - **PDF Documentation:** `Payment_Management_Module_End_User_Documentation.pdf`.
 
+### 6. Cart Management Module
+- **Add to Cart:** Customers add products directly from the product page. The system validates that the product is active and has sufficient stock before adding it. If the same product is already in the customer's cart, the quantities are merged instead of creating a duplicate row.
+- **Update Cart:** Customers can modify the quantity of any cart line item. The total price is recalculated in real time and inventory is re-checked against the new quantity.
+- **Remove from Cart:** Customers can remove individual items from the cart, and the cart total is recalculated automatically. Admins can also clear an entire customer's cart in one click.
+- **Cart Dashboard:** Customers see their cart contents (product name, SKU, unit price, quantity, line total, stock remaining); admins view all customer carts and analyse cart abandonment via summary cards (Total Cart Value, Customers With Carts, Total Quantity, Avg Items / Customer) plus a per-customer filter.
+- **PDF Documentation:** `Cart_Management_Module_End_User_Documentation.pdf`.
+
 ---
 
 ## Database Design
@@ -82,6 +89,17 @@ A full-featured Spring Boot and MySQL web application and REST API developed as 
 | `payment_status` | `VARCHAR(50)` | NOT NULL | `Paid`, `Failed`, or `Refunded` |
 | `created_at` | `DATETIME` | NOT NULL | When the payment was processed |
 | `updated_at` | `DATETIME` | NOT NULL | When the payment was last updated |
+
+### Table: `carts`
+| Column | Datatype | Constraint | Description |
+|---|---|---|---|
+| `cart_id` | `INT / BIGINT` | PK, Auto Increment | Unique identifier for each cart line item |
+| `customer_id` | `INT / BIGINT` | FK (`users.user_id`) | References the customer (shopper) |
+| `product_id` | `INT / BIGINT` | FK (`products.id`) | References the product added to the cart |
+| `quantity` | `INT` | NOT NULL | Number of units of the product |
+| `total_price` | `DECIMAL(10,2)` | NOT NULL | Line total (unit price × quantity) |
+| `created_at` | `DATETIME` | NOT NULL | Timestamp when the item was added to cart |
+| `updated_at` | `DATETIME` | NOT NULL | Timestamp when the cart item was last updated |
 
 ---
 
@@ -133,6 +151,19 @@ A full-featured Spring Boot and MySQL web application and REST API developed as 
 | `GET` | `/api/payments/{id}` | Get payment by ID |
 | `GET` | `/api/payments/order/{orderId}` | Latest payment for an order |
 | `POST` | `/api/payments/{id}/refund` | Refund a paid payment and cancel the order |
+
+### Cart Management (`/api/carts`)
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `POST` | `/api/carts` | Add a product to a customer's cart (merges if already present) |
+| `GET` | `/api/carts` | List all cart line items (supports `?customerId=X`) |
+| `GET` | `/api/carts/stats` | Cart-abandonment analysis stats (total value, unique customers, qty, avg) |
+| `GET` | `/api/carts/{id}` | Get one cart row by cart_id |
+| `GET` | `/api/carts/customer/{customerId}` | Get a specific customer's cart |
+| `GET` | `/api/carts/customer/{customerId}/summary` | Get customer cart grand total, unique items, total qty |
+| `PUT` | `/api/carts/{id}/quantity` | Update quantity of a cart item (rechecks stock) |
+| `DELETE` | `/api/carts/{id}` | Remove an item from the cart |
+| `DELETE` | `/api/carts/customer/{customerId}` | Clear the ENTIRE cart for a customer |
 
 ---
 

@@ -196,6 +196,11 @@
                 <i class="bi bi-credit-card-2-front-fill me-1"></i> Payment Management
             </button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="carts-tab" data-bs-toggle="tab" data-bs-target="#carts-pane" type="button" role="tab">
+                <i class="bi bi-cart4 me-1"></i> Cart Management
+            </button>
+        </li>
     </ul>
 
     <div class="tab-content" id="moduleTabsContent">
@@ -654,6 +659,127 @@
             </div>
         </div>
 
+        <!-- ============================================================== -->
+        <!-- TAB 6: CART MANAGEMENT MODULE -->
+        <!-- ============================================================== -->
+        <div class="tab-pane fade" id="carts-pane" role="tabpanel">
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card bg-success">
+                        <div>
+                            <div class="stat-number" id="statCartTotalValue">$0.00</div>
+                            <div class="stat-label">Total Cart Value</div>
+                        </div>
+                        <i class="bi bi-currency-dollar fs-1 opacity-50"></i>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card bg-primary">
+                        <div>
+                            <div class="stat-number" id="statCartUniqueCustomers">0</div>
+                            <div class="stat-label">Customers With Carts</div>
+                        </div>
+                        <i class="bi bi-people fs-1 opacity-50"></i>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card" style="background-color: #fd7e14;">
+                        <div>
+                            <div class="stat-number" id="statCartTotalItems">0</div>
+                            <div class="stat-label">Items (Total Qty)</div>
+                        </div>
+                        <i class="bi bi-box-seam fs-1 opacity-50"></i>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card bg-info">
+                        <div>
+                            <div class="stat-number" id="statCartAvgItems">0</div>
+                            <div class="stat-label">Avg Items / Customer</div>
+                        </div>
+                        <i class="bi bi-bar-chart-line fs-1 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body p-4">
+                    <h4 class="mb-3">Add to Cart</h4>
+                    <p class="text-muted mb-3">Add products directly into a customer's shopping cart. Stock is validated before saving. If the same product is already in the cart, the quantity is automatically merged.</p>
+                    <form id="cartForm">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="cartCustomerSelect" class="form-label">Customer *</label>
+                                <select id="cartCustomerSelect" class="form-select" required>
+                                    <option value="">Select customer...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="cartProductSelect" class="form-label">Product *</label>
+                                <select id="cartProductSelect" class="form-select" required>
+                                    <option value="">Select product (in stock)...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="cartQuantity" class="form-label">Quantity *</label>
+                                <input type="number" id="cartQuantity" class="form-control" min="1" value="1" required>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end gap-2">
+                                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-cart-plus me-1"></i>Add to Cart</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <h5 class="mb-0"><i class="bi bi-cart4 me-2"></i>Cart Dashboard</h5>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <select id="cartCustomerFilter" class="form-select form-select-sm" style="width: auto;" onchange="filterCartsByCustomer(this.value)">
+                            <option value="">All Customers</option>
+                        </select>
+                        <button class="btn btn-sm btn-outline-danger" onclick="confirmClearCurrentCustomerCart()" title="Clear all cart items for the selected customer">
+                            <i class="bi bi-trash me-1"></i>Clear Cart
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="loadCarts()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>
+                    </div>
+                </div>
+                <div id="cartCustomerSummary" class="px-4 pt-3 pb-0 d-none">
+                    <div class="p-3 bg-light rounded d-flex flex-wrap justify-content-around gap-3 text-center small mb-2">
+                        <div><strong>Customer:</strong> <span id="sumCustName">-</span></div>
+                        <div><strong>Unique Items:</strong> <span id="sumUniqueItems">0</span></div>
+                        <div><strong>Total Qty:</strong> <span id="sumTotalQty">0</span></div>
+                        <div><strong>Grand Total:</strong> <span id="sumGrandTotal" class="text-primary fw-bold">$0.00</span></div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                        <tr>
+                            <th>Cart ID</th>
+                            <th>Customer</th>
+                            <th>Product</th>
+                            <th>SKU</th>
+                            <th>Unit Price</th>
+                            <th>Qty</th>
+                            <th>Line Total</th>
+                            <th>Stock Left</th>
+                            <th>Added At</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="cartsTableBody">
+                        <tr>
+                            <td colspan="10" class="empty-state">Loading carts...</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 </main>
 
@@ -894,10 +1020,12 @@
     let cachedCategories = [];
     let cachedOrders = [];
     let cachedPayments = [];
+    let cachedCarts = [];
     let cartItems = [];
     let currentOrderStatusFilter = "ALL";
     let currentCustomerStatusFilter = "ALL";
     let currentPaymentStatusFilter = "ALL";
+    let currentCartCustomerFilter = "";
 
     // -------------------------------------------------------------
     // INITIALIZATION
@@ -908,6 +1036,7 @@
         loadProducts();
         loadCategories();
         loadPayments();
+        loadCarts();
     });
 
     // Global Message Alert
@@ -1914,6 +2043,221 @@
             await loadPayments();
             loadOrders();
             loadCustomers();
+        } catch (err) {
+            showMessage(err.message, "danger");
+        }
+    }
+
+    // =============================================================
+    // 6. CART MANAGEMENT LOGIC
+    // =============================================================
+    async function loadCarts() {
+        const tbody = document.getElementById("cartsTableBody");
+        if (!tbody) return;
+        try {
+            const url = currentCartCustomerFilter
+                ? `/api/carts?customerId=${encodeURIComponent(currentCartCustomerFilter)}`
+                : "/api/carts";
+            const res = await fetch(url);
+            if (!res.ok) throw new Error("Failed to load carts");
+            cachedCarts = await res.json();
+
+            await refreshCartStats();
+            renderCartsTable(cachedCarts);
+            populateCartCustomerAndProductDropdowns();
+            populateCartCustomerFilterOptions();
+
+            // If a specific customer filter is active, load their summary
+            const sumBox = document.getElementById("cartCustomerSummary");
+            if (sumBox) {
+                if (currentCartCustomerFilter) {
+                    try {
+                        const sres = await fetch(`/api/carts/customer/${currentCartCustomerFilter}/summary`);
+                        if (sres.ok) {
+                            const s = await sres.json();
+                            const cust = cachedCustomers.find(c => String(c.userId) === String(currentCartCustomerFilter));
+                            sumBox.classList.remove("d-none");
+                            document.getElementById("sumCustName").textContent = cust ? `${escapeText(cust.firstName || "")} ${escapeText(cust.lastName || "")}` : `Customer #${currentCartCustomerFilter}`;
+                            document.getElementById("sumUniqueItems").textContent = s.uniqueItems || 0;
+                            document.getElementById("sumTotalQty").textContent = s.totalQuantity || 0;
+                            document.getElementById("sumGrandTotal").textContent = `$${Number(s.grandTotal || 0).toFixed(2)}`;
+                        } else {
+                            sumBox.classList.add("d-none");
+                        }
+                    } catch { sumBox.classList.add("d-none"); }
+                } else {
+                    sumBox.classList.add("d-none");
+                }
+            }
+        } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="10" class="empty-state text-danger">Error loading carts: ${err.message}</td></tr>`;
+        }
+    }
+
+    async function refreshCartStats() {
+        try {
+            const res = await fetch("/api/carts/stats");
+            if (!res.ok) return;
+            const s = await res.json();
+            document.getElementById("statCartTotalValue").textContent = `$${Number(s.totalCartValue || 0).toFixed(2)}`;
+            document.getElementById("statCartUniqueCustomers").textContent = s.uniqueCustomersWithCarts || 0;
+            document.getElementById("statCartTotalItems").textContent = s.totalItemsQuantity || 0;
+            document.getElementById("statCartAvgItems").textContent = s.avgItemsPerCustomer || 0;
+        } catch (e) {}
+    }
+
+    function populateCartCustomerAndProductDropdowns() {
+        const custSel = document.getElementById("cartCustomerSelect");
+        const prodSel = document.getElementById("cartProductSelect");
+        if (!custSel || !prodSel) return;
+
+        const curCust = custSel.value;
+        const curProd = prodSel.value;
+
+        custSel.innerHTML = '<option value="">Select customer...</option>';
+        cachedCustomers
+            .filter(c => c.status !== false)
+            .forEach(c => {
+                const name = `${escapeText(c.firstName || "")} ${escapeText(c.lastName || "")}`.trim() || escapeText(c.email || "");
+                custSel.innerHTML += `<option value="${c.userId}">${escapeText(c.email)} — ${name}</option>`;
+            });
+        if (curCust && cachedCustomers.some(c => String(c.userId) === String(curCust))) custSel.value = curCust;
+
+        prodSel.innerHTML = '<option value="">Select product (in stock)...</option>';
+        cachedProducts
+            .filter(p => p.status && p.inventoryCount > 0)
+            .forEach(p => {
+                prodSel.innerHTML += `<option value="${p.id}">${escapeText(p.name)} — $${Number(p.price).toFixed(2)} (Stock: ${p.inventoryCount}) [${escapeText(p.sku || "")}]</option>`;
+            });
+        if (curProd && cachedProducts.some(p => String(p.id) === String(curProd))) prodSel.value = curProd;
+    }
+
+    function populateCartCustomerFilterOptions() {
+        const sel = document.getElementById("cartCustomerFilter");
+        if (!sel) return;
+        const cur = sel.value || currentCartCustomerFilter;
+        const customerIdsInCarts = new Set(cachedCarts.map(c => String(c.customerId)));
+        sel.innerHTML = '<option value="">All Customers</option>';
+        cachedCustomers.forEach(c => {
+            if (!customerIdsInCarts.has(String(c.userId))) return;
+            const name = `${escapeText(c.firstName || "")} ${escapeText(c.lastName || "")}`.trim() || escapeText(c.email || "");
+            sel.innerHTML += `<option value="${c.userId}">${escapeText(c.email)} — ${name}</option>`;
+        });
+        if (customerIdsInCarts.has(String(cur)) || !cur) sel.value = cur;
+    }
+
+    function filterCartsByCustomer(customerId) {
+        currentCartCustomerFilter = customerId ? String(customerId) : "";
+        loadCarts();
+    }
+
+    function renderCartsTable(carts) {
+        const tbody = document.getElementById("cartsTableBody");
+        if (!carts || carts.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="10" class="empty-state">${currentCartCustomerFilter ? "No cart items for this customer." : "No cart records found."}</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = carts.map(c => `
+            <tr>
+                <td><strong>#${c.cartId}</strong></td>
+                <td>
+                    <div><strong>${escapeText(c.customerName || "-")}</strong></div>
+                    <small class="text-muted">${escapeText(c.customerEmail || "")}</small>
+                </td>
+                <td>${escapeText(c.productName || "-")}</td>
+                <td><code>${escapeText(c.productSku || "-")}</code></td>
+                <td>$${Number(c.unitPrice).toFixed(2)}</td>
+                <td><strong>${c.quantity}</strong></td>
+                <td><strong class="text-primary">$${Number(c.totalPrice).toFixed(2)}</strong></td>
+                <td>${c.availableInventory != null ? c.availableInventory : "-"}</td>
+                <td><small class="text-muted">${c.createdAt ? new Date(c.createdAt).toLocaleString() : "-"}</small></td>
+                <td>
+                    <div class="d-flex gap-1">
+                        <button class="btn btn-sm btn-outline-primary" title="Update Quantity" onclick="promptUpdateCartQty(${c.cartId}, ${c.quantity})">
+                            <i class="bi bi-pencil-square me-1"></i>Qty
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" title="Remove Item" onclick="removeCartItem(${c.cartId})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join("");
+    }
+
+    document.getElementById("cartForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const customerId = document.getElementById("cartCustomerSelect").value;
+        const productId = document.getElementById("cartProductSelect").value;
+        const quantity = Number(document.getElementById("cartQuantity").value || 1);
+        if (!customerId) { showMessage("Please select a customer.", "warning"); return; }
+        if (!productId) { showMessage("Please select a product.", "warning"); return; }
+        if (!quantity || quantity < 1) { showMessage("Quantity must be at least 1.", "warning"); return; }
+
+        try {
+            const res = await fetch("/api/carts", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ customerId: Number(customerId), productId: Number(productId), quantity })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Could not add to cart");
+            showMessage(`Added to Cart #${data.cartId} — ${escapeText(data.productName)} × ${data.quantity}. Line Total: $${Number(data.totalPrice).toFixed(2)}`, "success");
+            document.getElementById("cartForm").reset();
+            document.getElementById("cartQuantity").value = 1;
+            await loadCarts();
+        } catch (err) {
+            showMessage(err.message, "danger");
+        }
+    });
+
+    async function promptUpdateCartQty(cartId, currentQty) {
+        const qtyStr = prompt("Enter new quantity for this cart item (must be in stock):", String(currentQty));
+        if (qtyStr === null) return;
+        const qty = parseInt(qtyStr, 10);
+        if (!qty || qty < 1) { showMessage("Quantity must be a number ≥ 1.", "warning"); return; }
+        try {
+            const res = await fetch(`/api/carts/${cartId}/quantity`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ quantity: qty })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Could not update quantity");
+            showMessage(`Cart #${cartId} quantity updated to ${qty}. New line total: $${Number(data.totalPrice).toFixed(2)}`, "success");
+            await loadCarts();
+        } catch (err) {
+            showMessage(err.message, "danger");
+        }
+    }
+
+    async function removeCartItem(cartId) {
+        if (!confirm(`Remove cart item #${cartId}?`)) return;
+        try {
+            const res = await fetch(`/api/carts/${cartId}`, { method: "DELETE" });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Could not remove item");
+            showMessage(data.message || `Cart item #${cartId} removed.`, "warning");
+            await loadCarts();
+        } catch (err) {
+            showMessage(err.message, "danger");
+        }
+    }
+
+    async function confirmClearCurrentCustomerCart() {
+        if (!currentCartCustomerFilter) {
+            showMessage("Please select a customer first from the filter dropdown.", "warning");
+            return;
+        }
+        const cust = cachedCustomers.find(c => String(c.userId) === String(currentCartCustomerFilter));
+        const who = cust ? `${cust.firstName || ""} ${cust.lastName || ""}`.trim() : `#${currentCartCustomerFilter}`;
+        if (!confirm(`Clear ENTIRE cart for customer ${who}? This cannot be undone.`)) return;
+        try {
+            const res = await fetch(`/api/carts/customer/${currentCartCustomerFilter}`, { method: "DELETE" });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Could not clear cart");
+            showMessage(data.message || `Cart cleared for customer ${who}.`, "warning");
+            await loadCarts();
         } catch (err) {
             showMessage(err.message, "danger");
         }
