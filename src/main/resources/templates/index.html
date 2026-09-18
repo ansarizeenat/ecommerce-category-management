@@ -135,6 +135,66 @@
             color: #fff;
         }
 
+        .badge-intransit {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 10px 0;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 45px;
+            padding-bottom: 22px;
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 25px;
+            bottom: 0;
+            width: 2px;
+            background: #e2e8f0;
+        }
+
+        .timeline-item:last-child::before {
+            display: none;
+        }
+
+        .timeline-icon {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            background: #e9ecef;
+            color: #6c757d;
+        }
+
+        .timeline-icon.completed {
+            background: #198754;
+            color: #fff;
+        }
+
+        .timeline-icon.active {
+            background: #0d6efd;
+            color: #fff;
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2);
+        }
+
         .empty-state {
             padding: 40px;
             text-align: center;
@@ -199,6 +259,11 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="carts-tab" data-bs-toggle="tab" data-bs-target="#carts-pane" type="button" role="tab">
                 <i class="bi bi-cart4 me-1"></i> Cart Management
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="shipping-tab" data-bs-toggle="tab" data-bs-target="#shipping-pane" type="button" role="tab">
+                <i class="bi bi-truck me-1"></i> Shipping Management
             </button>
         </li>
     </ul>
@@ -780,6 +845,192 @@
             </div>
         </div>
 
+        <!-- ============================================================== -->
+        <!-- TAB 7: SHIPPING MANAGEMENT MODULE -->
+        <!-- ============================================================== -->
+        <div class="tab-pane fade" id="shipping-pane" role="tabpanel">
+
+            <!-- 1. Stats Row -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card bg-primary">
+                        <div>
+                            <div class="stat-number" id="statTotalShipments">0</div>
+                            <div class="stat-label">Total Shipments</div>
+                        </div>
+                        <i class="bi bi-box-seam fs-1 opacity-50"></i>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card bg-info text-dark">
+                        <div>
+                            <div class="stat-number" id="statShippedCount">0</div>
+                            <div class="stat-label">Dispatched (Shipped)</div>
+                        </div>
+                        <i class="bi bi-truck fs-1 opacity-50"></i>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card bg-warning text-dark">
+                        <div>
+                            <div class="stat-number" id="statInTransitCount">0</div>
+                            <div class="stat-label">In Transit</div>
+                        </div>
+                        <i class="bi bi-geo-alt-fill fs-1 opacity-50"></i>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card bg-success">
+                        <div>
+                            <div class="stat-number" id="statDeliveredCount">0</div>
+                            <div class="stat-label">Delivered</div>
+                        </div>
+                        <i class="bi bi-check2-all fs-1 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Track Shipment & Cost Calculator in 2 columns -->
+            <div class="row g-4 mb-4">
+                <!-- Track Shipment Box (Customer Facing) -->
+                <div class="col-lg-5">
+                    <div class="card h-100">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0 text-primary"><i class="bi bi-search me-2"></i>Track Shipment (Customer)</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <p class="text-muted small mb-3">Enter your courier tracking number below to view real-time shipment status and delivery progress.</p>
+                            <form id="quickTrackForm" onsubmit="event.preventDefault(); trackShipmentByInput();">
+                                <div class="input-group mb-3">
+                                    <input type="text" id="trackNumberInput" class="form-control" placeholder="e.g. BD-12345678 or FDX-..." required>
+                                    <button class="btn btn-primary" type="submit">
+                                        <i class="bi bi-geo-alt me-1"></i>Track
+                                    </button>
+                                </div>
+                            </form>
+                            <div id="quickTrackResult" class="d-none border rounded p-3 bg-light">
+                                <!-- Dynamic Tracking Preview -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipping Cost Calculator & Create Shipment (Admin / Dispatcher) -->
+                <div class="col-lg-7">
+                    <div class="card h-100">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 text-primary"><i class="bi bi-calculator me-2"></i>Calculate Cost &amp; Dispatch Order</h5>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="populateUnshippedOrderSelect()">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Refresh Orders
+                            </button>
+                        </div>
+                        <div class="card-body p-4">
+                            <form id="shippingCreateForm">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="shippingOrderSelect" class="form-label">Select Unshipped Order *</label>
+                                        <select id="shippingOrderSelect" class="form-select" required>
+                                            <option value="">Select an order to ship...</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="shippingCourierSelect" class="form-label">Courier Service *</label>
+                                        <select id="shippingCourierSelect" class="form-select" required>
+                                            <option value="Blue Dart">Blue Dart</option>
+                                            <option value="FedEx">FedEx Express</option>
+                                            <option value="DHL">DHL Express</option>
+                                            <option value="Delhivery">Delhivery</option>
+                                            <option value="India Post / Speed Post">Speed Post</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="calcWeight" class="form-label">Weight (kg) *</label>
+                                        <input type="number" id="calcWeight" class="form-control" step="0.1" min="0.1" value="1.5" required onchange="triggerAutoCalculate()">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="calcLocation" class="form-label">Delivery Location *</label>
+                                        <select id="calcLocation" class="form-select" required onchange="triggerAutoCalculate()">
+                                            <option value="Local">Local (City)</option>
+                                            <option value="Domestic" selected>Domestic (National)</option>
+                                            <option value="International">International</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="calcMethod" class="form-label">Shipping Method *</label>
+                                        <select id="calcMethod" class="form-select" required onchange="triggerAutoCalculate()">
+                                            <option value="Standard" selected>Standard (3-5 days)</option>
+                                            <option value="Express">Express (1-2 days)</option>
+                                            <option value="Overnight">Overnight (Next day)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="customTrackingNumber" class="form-label">Tracking Number <small class="text-muted">(Optional - auto-generated if blank)</small></label>
+                                        <input type="text" id="customTrackingNumber" class="form-control" placeholder="Leave blank to auto-generate">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="finalShippingCost" class="form-label">Calculated Shipping Cost ($)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" id="finalShippingCost" class="form-control" step="0.01" min="0" placeholder="0.00">
+                                            <button type="button" class="btn btn-outline-secondary" onclick="manualCalculateCost()">Calculate</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-12" id="calcBreakdownText">
+                                        <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Cost = (Base $5 + $2/kg) × Location Multiplier × Method Multiplier</small>
+                                    </div>
+                                    <div class="col-12 d-flex justify-content-end gap-2 pt-2">
+                                        <button type="submit" class="btn btn-primary px-4">
+                                            <i class="bi bi-send-check me-1"></i> Create Shipment &amp; Dispatch
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Shipping Dashboard Table -->
+            <div class="card">
+                <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <h5 class="mb-0"><i class="bi bi-speedometer2 me-2"></i>Shipping Dashboard</h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="btn-group btn-group-sm" role="group" id="shippingFilterGroup">
+                            <button type="button" class="btn btn-outline-secondary filter-btn active" onclick="filterShipping('ALL', this)">All</button>
+                            <button type="button" class="btn btn-outline-secondary filter-btn" onclick="filterShipping('Shipped', this)">Shipped</button>
+                            <button type="button" class="btn btn-outline-secondary filter-btn" onclick="filterShipping('In Transit', this)">In Transit</button>
+                            <button type="button" class="btn btn-outline-secondary filter-btn" onclick="filterShipping('Delivered', this)">Delivered</button>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" onclick="loadShipping()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                        <tr>
+                            <th>Shipping ID</th>
+                            <th>Order ID</th>
+                            <th>Customer Name</th>
+                            <th>Shipping Address</th>
+                            <th>Courier Service</th>
+                            <th>Tracking Number</th>
+                            <th>Status</th>
+                            <th>Shipping Cost</th>
+                            <th>Created At</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="shippingTableBody">
+                        <tr>
+                            <td colspan="10" class="empty-state">Loading shipments...</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
     </div>
 </main>
 
@@ -1010,6 +1261,73 @@
     </div>
 </div>
 
+<!-- ============================================================== -->
+<!-- MODAL: TRACK SHIPMENT TIMELINE -->
+<!-- ============================================================== -->
+<div class="modal fade" id="trackShipmentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-geo-alt-fill me-2"></i>Live Shipment Tracking</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" id="trackShipmentModalContent">
+                <!-- Dynamic Content injected via JS -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- MODAL: UPDATE SHIPPING INFORMATION -->
+<!-- ============================================================== -->
+<div class="modal fade" id="updateShippingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-truck-front-fill me-2"></i>Update Shipping Information</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="updateShippingForm" onsubmit="event.preventDefault(); submitUpdateShipping();">
+                <div class="modal-body p-4">
+                    <input type="hidden" id="editShippingId">
+                    <p class="mb-3">Updating details for Shipment <strong>#<span id="editShippingDisplayId"></span></strong> (Order #<span id="editShippingOrderDisplayId"></span>):</p>
+                    <div class="mb-3">
+                        <label for="editCourierService" class="form-label">Courier Service *</label>
+                        <select id="editCourierService" class="form-select" required>
+                            <option value="Blue Dart">Blue Dart</option>
+                            <option value="FedEx">FedEx Express</option>
+                            <option value="DHL">DHL Express</option>
+                            <option value="Delhivery">Delhivery</option>
+                            <option value="India Post / Speed Post">Speed Post</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editTrackingNumber" class="form-label">Tracking Number *</label>
+                        <input type="text" id="editTrackingNumber" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editShippingStatus" class="form-label">Shipping Status *</label>
+                        <select id="editShippingStatus" class="form-select" required>
+                            <option value="Shipped">Shipped</option>
+                            <option value="In Transit">In Transit</option>
+                            <option value="Delivered">Delivered</option>
+                        </select>
+                        <small class="text-muted mt-1 d-block">Updating to "Delivered" will automatically synchronize Order Status to Delivered.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4"><i class="bi bi-check2-circle me-1"></i>Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Bootstrap 5 Bundle JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -1021,10 +1339,12 @@
     let cachedOrders = [];
     let cachedPayments = [];
     let cachedCarts = [];
+    let cachedShipments = [];
     let cartItems = [];
     let currentOrderStatusFilter = "ALL";
     let currentCustomerStatusFilter = "ALL";
     let currentPaymentStatusFilter = "ALL";
+    let currentShippingStatusFilter = "ALL";
     let currentCartCustomerFilter = "";
 
     // -------------------------------------------------------------
@@ -1037,6 +1357,7 @@
         loadCategories();
         loadPayments();
         loadCarts();
+        loadShipping();
     });
 
     // Global Message Alert
@@ -1317,6 +1638,8 @@
             const canCancel = order.orderStatus === "Pending" && order.status !== false;
             const isPaid = isOrderPaid(order.id);
             const canPay = !isPaid && order.status !== false && order.orderStatus !== "Cancelled";
+            const shipment = getShipmentForOrder(order.id);
+            const canShip = !shipment && order.status !== false && order.orderStatus !== "Cancelled";
 
             return `
                 <tr>
@@ -1328,7 +1651,10 @@
                     <td><small class="d-inline-block text-truncate" style="max-width: 180px;">${escapeText(order.shippingAddress)}</small></td>
                     <td><span class="badge bg-light text-dark border">${itemCount} item(s)</span></td>
                     <td><strong class="text-primary">$${Number(order.totalAmount).toFixed(2)}</strong></td>
-                    <td><span class="badge ${statusClass}">${order.orderStatus}</span></td>
+                    <td>
+                        <span class="badge ${statusClass}">${order.orderStatus}</span>
+                        ${shipment ? `<div class="mt-1"><a href="javascript:void(0)" class="badge bg-light text-primary border text-decoration-none" onclick="trackShipmentByNumber('${shipment.trackingNumber}')" title="Click to Track Package"><i class="bi bi-truck me-1"></i>${escapeText(shipment.courierService)}: ${escapeText(shipment.trackingNumber)}</a></div>` : ''}
+                    </td>
                     <td>
                         <span class="badge ${order.status ? 'bg-success-subtle text-success border border-success' : 'bg-danger-subtle text-danger border border-danger'}">
                             ${order.status ? 'Active' : 'Cancelled'}
@@ -1344,6 +1670,16 @@
                             ${canPay ? `
                                 <button class="btn btn-outline-success" title="Process Payment" onclick="openPaymentForOrder(${order.id})">
                                     <i class="bi bi-credit-card"></i>
+                                </button>
+                            ` : ''}
+                            ${canShip ? `
+                                <button class="btn btn-outline-info text-dark" title="Dispatch / Ship Order" onclick="openShippingForOrder(${order.id})">
+                                    <i class="bi bi-truck"></i>
+                                </button>
+                            ` : ''}
+                            ${shipment ? `
+                                <button class="btn btn-outline-primary" title="Track Shipment" onclick="trackShipmentByNumber('${shipment.trackingNumber}')">
+                                    <i class="bi bi-geo-alt"></i>
                                 </button>
                             ` : ''}
                             ${order.orderStatus !== 'Cancelled' ? `
@@ -2258,6 +2594,326 @@
             if (!res.ok) throw new Error(data.error || "Could not clear cart");
             showMessage(data.message || `Cart cleared for customer ${who}.`, "warning");
             await loadCarts();
+        } catch (err) {
+            showMessage(err.message, "danger");
+        }
+    }
+
+    // =============================================================
+    // 7. SHIPPING MANAGEMENT LOGIC
+    // =============================================================
+    function getShipmentForOrder(orderId) {
+        return cachedShipments.find(s => String(s.orderId) === String(orderId));
+    }
+
+    async function loadShipping() {
+        const tbody = document.getElementById("shippingTableBody");
+        if (!tbody) return;
+        try {
+            const url = currentShippingStatusFilter && currentShippingStatusFilter !== "ALL"
+                ? `/api/shipping?status=${encodeURIComponent(currentShippingStatusFilter)}`
+                : "/api/shipping";
+            const res = await fetch(url);
+            if (!res.ok) throw new Error("Failed to load shipments");
+            cachedShipments = await res.json();
+            await refreshShippingStats();
+            renderShippingTable(cachedShipments);
+            populateUnshippedOrderSelect();
+            if (cachedOrders && cachedOrders.length) renderOrdersTable(cachedOrders);
+        } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="10" class="empty-state text-danger">Error loading shipments: ${err.message}</td></tr>`;
+        }
+    }
+
+    async function refreshShippingStats() {
+        try {
+            const res = await fetch("/api/shipping/stats");
+            if (!res.ok) return;
+            const stats = await res.json();
+            document.getElementById("statTotalShipments").textContent = stats.totalShipments || 0;
+            document.getElementById("statShippedCount").textContent = stats.shippedCount || 0;
+            document.getElementById("statInTransitCount").textContent = stats.inTransitCount || 0;
+            document.getElementById("statDeliveredCount").textContent = stats.deliveredCount || 0;
+        } catch (e) {}
+    }
+
+    function filterShipping(status, btn) {
+        currentShippingStatusFilter = status;
+        document.querySelectorAll("#shippingFilterGroup .filter-btn").forEach(b => b.classList.remove("active"));
+        if (btn) btn.classList.add("active");
+        loadShipping();
+    }
+
+    function populateUnshippedOrderSelect() {
+        const sel = document.getElementById("shippingOrderSelect");
+        if (!sel) return;
+        const current = sel.value;
+        const unshipped = cachedOrders.filter(o => o.status !== false && o.orderStatus !== "Cancelled" && !getShipmentForOrder(o.id));
+        sel.innerHTML = '<option value="">Select an order to ship...</option>';
+        unshipped.forEach(o => {
+            sel.innerHTML += `<option value="${o.id}">#${o.id} — ${escapeText(o.customerName)} — $${Number(o.totalAmount).toFixed(2)} (${escapeText(o.orderStatus)})</option>`;
+        });
+        if (current && unshipped.some(o => String(o.id) === String(current))) {
+            sel.value = current;
+        }
+    }
+
+    function openShippingForOrder(orderId) {
+        const tab = document.getElementById("shipping-tab");
+        if (tab) new bootstrap.Tab(tab).show();
+        populateUnshippedOrderSelect();
+        const sel = document.getElementById("shippingOrderSelect");
+        if (sel) sel.value = String(orderId);
+        triggerAutoCalculate();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function triggerAutoCalculate() {
+        const weight = parseFloat(document.getElementById("calcWeight").value) || 1.0;
+        const location = document.getElementById("calcLocation").value;
+        const method = document.getElementById("calcMethod").value;
+
+        try {
+            const res = await fetch("/api/shipping/calculate-cost", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ weight, deliveryLocation: location, shippingMethod: method })
+            });
+            if (!res.ok) return;
+            const data = await res.json();
+            document.getElementById("finalShippingCost").value = Number(data.totalShippingCost).toFixed(2);
+            document.getElementById("calcBreakdownText").innerHTML = `
+                <span class="text-success"><i class="bi bi-check-circle me-1"></i>${escapeText(data.breakdown)} (Est. ${data.estimatedDeliveryDays} days)</span>
+            `;
+        } catch (e) {}
+    }
+
+    function manualCalculateCost() {
+        triggerAutoCalculate();
+    }
+
+    function renderShippingTable(shipments) {
+        const tbody = document.getElementById("shippingTableBody");
+        if (!tbody) return;
+        if (!shipments || shipments.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="10" class="empty-state">No shipments found matching the filter.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = shipments.map(s => {
+            let badgeClass = "badge-shipped";
+            if (s.shippingStatus === "In Transit") badgeClass = "badge-intransit";
+            if (s.shippingStatus === "Delivered") badgeClass = "badge-delivered";
+
+            const created = s.createdAt ? new Date(s.createdAt).toLocaleString() : "-";
+            return `
+                <tr>
+                    <td><strong>#${s.shippingId}</strong></td>
+                    <td><a href="javascript:void(0)" onclick="viewOrderDetails(${s.orderId})">#${s.orderId}</a></td>
+                    <td><strong>${escapeText(s.customerName || "-")}</strong></td>
+                    <td><small class="d-inline-block text-truncate" style="max-width: 170px;" title="${escapeText(s.shippingAddress)}">${escapeText(s.shippingAddress || "-")}</small></td>
+                    <td><span class="badge bg-light text-dark border"><i class="bi bi-truck me-1"></i>${escapeText(s.courierService)}</span></td>
+                    <td>
+                        <a href="javascript:void(0)" class="fw-semibold text-primary" onclick="trackShipmentByNumber('${escapeText(s.trackingNumber)}')">
+                            <code>${escapeText(s.trackingNumber)}</code>
+                        </a>
+                    </td>
+                    <td><span class="badge ${badgeClass}">${escapeText(s.shippingStatus)}</span></td>
+                    <td><strong class="text-success">$${Number(s.shippingCost || 0).toFixed(2)}</strong></td>
+                    <td><small class="text-muted">${created}</small></td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" title="Track Live Status" onclick="trackShipmentByNumber('${escapeText(s.trackingNumber)}')">
+                                <i class="bi bi-geo-alt"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary" title="Update Shipping Info" onclick="openUpdateShippingModal(${s.shippingId})">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+    }
+
+    document.getElementById("shippingCreateForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const orderId = document.getElementById("shippingOrderSelect").value;
+        if (!orderId) {
+            showMessage("Please select an order to ship.", "warning");
+            return;
+        }
+
+        const costVal = document.getElementById("finalShippingCost").value;
+        const payload = {
+            orderId: Number(orderId),
+            courierService: document.getElementById("shippingCourierSelect").value,
+            trackingNumber: document.getElementById("customTrackingNumber").value.trim(),
+            weight: parseFloat(document.getElementById("calcWeight").value) || 1.5,
+            deliveryLocation: document.getElementById("calcLocation").value,
+            shippingMethod: document.getElementById("calcMethod").value,
+            shippingCost: costVal ? parseFloat(costVal) : null
+        };
+
+        try {
+            const res = await fetch("/api/shipping", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Could not dispatch order");
+
+            showMessage(`Shipment #${data.shippingId} created! Tracking Number: <strong>${data.trackingNumber}</strong> via ${data.courierService}. Order status updated to Shipped.`, "success");
+            document.getElementById("shippingCreateForm").reset();
+            document.getElementById("calcWeight").value = 1.5;
+            document.getElementById("calcBreakdownText").innerHTML = `<small class="text-muted"><i class="bi bi-info-circle me-1"></i>Cost = (Base $5 + $2/kg) × Location Multiplier × Method Multiplier</small>`;
+            await loadShipping();
+            loadOrders();
+        } catch (err) {
+            showMessage(err.message, "danger");
+        }
+    });
+
+    async function trackShipmentByInput() {
+        const input = document.getElementById("trackNumberInput").value.trim();
+        if (!input) return;
+        const box = document.getElementById("quickTrackResult");
+        box.classList.remove("d-none");
+        box.innerHTML = `<div class="text-center py-3 text-muted"><div class="spinner-border spinner-border-sm me-2"></div>Looking up tracking details...</div>`;
+
+        try {
+            const res = await fetch(`/api/shipping/track/${encodeURIComponent(input)}`);
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Tracking record not found");
+
+            const s = data.shipping;
+            let badgeClass = s.shippingStatus === "Delivered" ? "bg-success" : (s.shippingStatus === "In Transit" ? "bg-primary" : "bg-info text-dark");
+
+            let timelineHtml = renderTimelineSteps(data.timeline);
+
+            box.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <h6 class="mb-0 fw-bold">${escapeText(s.courierService)}: <code>${escapeText(data.trackingNumber)}</code></h6>
+                        <small class="text-muted">Order #${s.orderId} — Recipient: ${escapeText(s.customerName)}</small>
+                    </div>
+                    <span class="badge ${badgeClass} px-3 py-2">${escapeText(data.currentStatus)}</span>
+                </div>
+                <div class="p-2 bg-white rounded border mb-3 small">
+                    <div><strong>Destination:</strong> ${escapeText(s.shippingAddress)}</div>
+                    <div><strong>Estimated Delivery:</strong> ${s.estimatedDelivery ? new Date(s.estimatedDelivery).toLocaleDateString() : 'In 3 business days'}</div>
+                </div>
+                <div class="timeline ps-2">
+                    ${timelineHtml}
+                </div>
+            `;
+        } catch (err) {
+            box.innerHTML = `<div class="alert alert-danger mb-0 small"><i class="bi bi-exclamation-triangle me-1"></i>${escapeText(err.message)}</div>`;
+        }
+    }
+
+    async function trackShipmentByNumber(trackingNumber) {
+        if (!trackingNumber) return;
+        const modal = new bootstrap.Modal(document.getElementById("trackShipmentModal"));
+        const body = document.getElementById("trackShipmentModalContent");
+        body.innerHTML = `<div class="text-center py-4 text-muted"><div class="spinner-border text-primary me-2"></div>Loading shipment timeline...</div>`;
+        modal.show();
+
+        try {
+            const res = await fetch(`/api/shipping/track/${encodeURIComponent(trackingNumber)}`);
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Shipment not found");
+
+            const s = data.shipping;
+            let badgeClass = s.shippingStatus === "Delivered" ? "bg-success" : (s.shippingStatus === "In Transit" ? "bg-primary" : "bg-info text-dark");
+            let timelineHtml = renderTimelineSteps(data.timeline);
+
+            body.innerHTML = `
+                <div class="card bg-light border-0 mb-3">
+                    <div class="card-body p-3">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                            <div>
+                                <span class="badge bg-secondary mb-1">Courier: ${escapeText(s.courierService)}</span>
+                                <h5 class="mb-0 text-primary">Tracking #: <code>${escapeText(s.trackingNumber)}</code></h5>
+                            </div>
+                            <span class="badge ${badgeClass} fs-6 px-3 py-2">${escapeText(data.currentStatus)}</span>
+                        </div>
+                        <div class="row g-2 mt-1 small">
+                            <div class="col-md-6"><strong>Customer:</strong> ${escapeText(s.customerName)}</div>
+                            <div class="col-md-6"><strong>Order ID:</strong> #${s.orderId}</div>
+                            <div class="col-md-12"><strong>Shipping Address:</strong> ${escapeText(s.shippingAddress)}</div>
+                            <div class="col-md-6"><strong>Shipping Method:</strong> ${escapeText(s.shippingMethod || "Standard")}</div>
+                            <div class="col-md-6"><strong>Shipping Cost:</strong> $${Number(s.shippingCost || 0).toFixed(2)}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Shipment Milestones &amp; Progress</h6>
+                <div class="timeline px-2">
+                    ${timelineHtml}
+                </div>
+            `;
+        } catch (err) {
+            body.innerHTML = `<div class="alert alert-danger"><i class="bi bi-exclamation-octagon me-2"></i>${escapeText(err.message)}</div>`;
+        }
+    }
+
+    function renderTimelineSteps(steps) {
+        if (!steps || !steps.length) return "<p class='text-muted'>No milestone events available.</p>";
+        return steps.map((item, idx) => {
+            const isCompleted = item.completed;
+            const iconClass = isCompleted ? "completed bi-check2" : "bi-circle";
+            const dateText = item.timestamp ? new Date(item.timestamp).toLocaleString() : "";
+            return `
+                <div class="timeline-item">
+                    <div class="timeline-icon ${isCompleted ? 'completed' : ''}">
+                        <i class="bi ${iconClass}"></i>
+                    </div>
+                    <div class="fw-bold ${isCompleted ? 'text-dark' : 'text-muted'}">${escapeText(item.step)}</div>
+                    <div class="small text-muted">${escapeText(item.description)}</div>
+                    ${dateText ? `<div class="text-secondary" style="font-size: 0.75rem;">${dateText}</div>` : ''}
+                </div>
+            `;
+        }).join("");
+    }
+
+    function openUpdateShippingModal(id) {
+        const s = cachedShipments.find(x => x.shippingId === id);
+        if (!s) return;
+        document.getElementById("editShippingId").value = s.shippingId;
+        document.getElementById("editShippingDisplayId").textContent = s.shippingId;
+        document.getElementById("editShippingOrderDisplayId").textContent = s.orderId;
+        document.getElementById("editCourierService").value = s.courierService || "Blue Dart";
+        document.getElementById("editTrackingNumber").value = s.trackingNumber || "";
+        document.getElementById("editShippingStatus").value = s.shippingStatus || "Shipped";
+
+        new bootstrap.Modal(document.getElementById("updateShippingModal")).show();
+    }
+
+    async function submitUpdateShipping() {
+        const id = document.getElementById("editShippingId").value;
+        const payload = {
+            courierService: document.getElementById("editCourierService").value.trim(),
+            trackingNumber: document.getElementById("editTrackingNumber").value.trim(),
+            shippingStatus: document.getElementById("editShippingStatus").value
+        };
+
+        try {
+            const res = await fetch(`/api/shipping/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Failed to update shipment");
+
+            showMessage(`Shipment #${id} updated! Status: ${data.shippingStatus}, Courier: ${data.courierService}.`, "success");
+            const modalEl = document.getElementById("updateShippingModal");
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) modalInstance.hide();
+            await loadShipping();
+            loadOrders();
         } catch (err) {
             showMessage(err.message, "danger");
         }

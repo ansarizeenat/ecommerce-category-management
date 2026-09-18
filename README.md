@@ -47,6 +47,13 @@ A full-featured Spring Boot and MySQL web application and REST API developed as 
 - **Cart Dashboard:** Customers see their cart contents (product name, SKU, unit price, quantity, line total, stock remaining); admins view all customer carts and analyse cart abandonment via summary cards (Total Cart Value, Customers With Carts, Total Quantity, Avg Items / Customer) plus a per-customer filter.
 - **PDF Documentation:** `Cart_Management_Module_End_User_Documentation.pdf`.
 
+### 7. Shipping Management Module (New)
+- **Shipping Cost Calculation:** Dynamic calculation based on weight, delivery location (Local, Domestic, International), and shipping method (Standard, Express, Overnight).
+- **Shipping Dashboard:** Admins view all orders with courier service, tracking number, shipping status, and cost. Filter by `Shipped`, `In Transit`, and `Delivered`.
+- **Track Shipment (Customer):** Live tracking lookup by tracking number featuring an interactive milestone progress stepper (Placed -> Shipped -> In Transit -> Delivered).
+- **Update Shipping Information:** Admins can re-assign couriers, update tracking numbers, and advance shipment status (which synchronizes order status to `Delivered`).
+- **PDF Documentation:** `Shipping_Management_Module_End_User_Documentation.pdf`.
+
 ---
 
 ## Database Design
@@ -100,6 +107,18 @@ A full-featured Spring Boot and MySQL web application and REST API developed as 
 | `total_price` | `DECIMAL(10,2)` | NOT NULL | Line total (unit price × quantity) |
 | `created_at` | `DATETIME` | NOT NULL | Timestamp when the item was added to cart |
 | `updated_at` | `DATETIME` | NOT NULL | Timestamp when the cart item was last updated |
+
+### Table: `shipping`
+| Column | Datatype | Constraint | Description |
+|---|---|---|---|
+| `shipping_id` | `INT / BIGINT` | PK, Auto Increment | Unique identifier for each shipping entry |
+| `order_id` | `INT / BIGINT` | FK (`orders.id`) | References the parent order |
+| `courier_service` | `VARCHAR(100)` | NOT NULL | Name of courier / logistics provider |
+| `tracking_number` | `VARCHAR(100)` | NOT NULL, UNIQUE | Unique courier tracking number |
+| `shipping_status` | `VARCHAR(50)` | NOT NULL | `Shipped`, `In Transit`, or `Delivered` |
+| `shipping_cost` | `DECIMAL(10,2)` | NOT NULL | Calculated shipping cost |
+| `created_at` | `DATETIME` | AUTO-GENERATED | Timestamp when shipping was initiated |
+| `updated_at` | `DATETIME` | AUTO-UPDATED | Timestamp when shipping was last updated |
 
 ---
 
@@ -164,6 +183,19 @@ A full-featured Spring Boot and MySQL web application and REST API developed as 
 | `PUT` | `/api/carts/{id}/quantity` | Update quantity of a cart item (rechecks stock) |
 | `DELETE` | `/api/carts/{id}` | Remove an item from the cart |
 | `DELETE` | `/api/carts/customer/{customerId}` | Clear the ENTIRE cart for a customer |
+
+### Shipping Management (`/api/shipping`)
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `GET` | `/api/shipping` | List all shipments (supports `?status=Shipped/In Transit/Delivered`) |
+| `GET` | `/api/shipping/stats` | Shipping metrics (Total, Shipped, In Transit, Delivered, Total Cost) |
+| `GET` | `/api/shipping/{id}` | Retrieve shipping record by ID |
+| `GET` | `/api/shipping/order/{orderId}` | Retrieve shipping details for an order |
+| `GET` | `/api/shipping/track/{trackingNumber}` | Public tracking endpoint with milestone timeline |
+| `POST` | `/api/shipping/calculate-cost` | Calculate shipping cost based on weight, location, and method |
+| `POST` | `/api/shipping` | Create shipment and update linked order status to Shipped |
+| `PUT` | `/api/shipping/{id}` | Update courier service, tracking number, or shipping status |
+| `PUT` | `/api/shipping/{id}/status` | Quick update status (Shipped, In Transit, Delivered) |
 
 ---
 
