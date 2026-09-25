@@ -47,12 +47,19 @@ A full-featured Spring Boot and MySQL web application and REST API developed as 
 - **Cart Dashboard:** Customers see their cart contents (product name, SKU, unit price, quantity, line total, stock remaining); admins view all customer carts and analyse cart abandonment via summary cards (Total Cart Value, Customers With Carts, Total Quantity, Avg Items / Customer) plus a per-customer filter.
 - **PDF Documentation:** `Cart_Management_Module_End_User_Documentation.pdf`.
 
-### 7. Shipping Management Module (New)
+### 7. Shipping Management Module
 - **Shipping Cost Calculation:** Dynamic calculation based on weight, delivery location (Local, Domestic, International), and shipping method (Standard, Express, Overnight).
 - **Shipping Dashboard:** Admins view all orders with courier service, tracking number, shipping status, and cost. Filter by `Shipped`, `In Transit`, and `Delivered`.
 - **Track Shipment (Customer):** Live tracking lookup by tracking number featuring an interactive milestone progress stepper (Placed -> Shipped -> In Transit -> Delivered).
 - **Update Shipping Information:** Admins can re-assign couriers, update tracking numbers, and advance shipment status (which synchronizes order status to `Delivered`).
 - **PDF Documentation:** `Shipping_Management_Module_End_User_Documentation.pdf`.
+
+### 8. Review and Rating Management Module (New)
+- **Add a Review/Rating:** Customers can add a review and 1 to 5 star rating for products they have purchased with verified purchase verification.
+- **Review Moderation:** Admins moderate all incoming reviews with one-click approve/reject actions to prevent spam and abuse.
+- **View Product Reviews:** Customers can view reviews and ratings on product pages, including 1 decimal average rating score and 1-to-5 star breakdown distribution bars.
+- **Delete/Update Reviews:** Admins can delete inappropriate reviews; customers can update or delete their own feedback (with edits returning to pending moderation).
+- **PDF Documentation:** `Review_and_Rating_Management_Module_End_User_Documentation.pdf`.
 
 ---
 
@@ -119,6 +126,19 @@ A full-featured Spring Boot and MySQL web application and REST API developed as 
 | `shipping_cost` | `DECIMAL(10,2)` | NOT NULL | Calculated shipping cost |
 | `created_at` | `DATETIME` | AUTO-GENERATED | Timestamp when shipping was initiated |
 | `updated_at` | `DATETIME` | AUTO-UPDATED | Timestamp when shipping was last updated |
+
+### Table: `reviews`
+| Column Name | Data Type | Key / Constraint | Description |
+|---|---|---|---|
+| `review_id` | `INT / BIGINT` | PK, Auto Increment | Unique identifier for each review |
+| `product_id` | `INT / BIGINT` | FK (`products.id`) | References the product |
+| `customer_id` | `INT / BIGINT` | FK (`users.user_id`) | References the reviewing customer |
+| `rating` | `INT` | NOT NULL (1 to 5) | Star rating (1 to 5 stars) |
+| `review_text` | `VARCHAR(1000)` | NULLABLE | Feedback text provided by customer |
+| `status` | `BOOLEAN` | DEFAULT `FALSE` | `TRUE` for approved reviews, `FALSE` for unapproved |
+| `verified_purchase` | `BOOLEAN` | DEFAULT `FALSE` | `TRUE` if product purchased by customer |
+| `created_at` | `DATETIME` | AUTO-GENERATED | Timestamp when review was created |
+| `updated_at` | `DATETIME` | AUTO-UPDATED | Timestamp when review was last updated |
 
 ---
 
@@ -196,6 +216,20 @@ A full-featured Spring Boot and MySQL web application and REST API developed as 
 | `POST` | `/api/shipping` | Create shipment and update linked order status to Shipped |
 | `PUT` | `/api/shipping/{id}` | Update courier service, tracking number, or shipping status |
 | `PUT` | `/api/shipping/{id}/status` | Quick update status (Shipped, In Transit, Delivered) |
+
+### Review and Rating Management (`/api/reviews`)
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `GET` | `/api/reviews` | List all reviews (supports `?status=` and `?productId=`) |
+| `GET` | `/api/reviews/stats` | Global platform review statistics |
+| `GET` | `/api/reviews/{id}` | Get review by ID |
+| `GET` | `/api/reviews/product/{productId}` | Get approved public reviews for a product |
+| `GET` | `/api/reviews/product/{productId}/summary` | Get rating score, review count, and 1-5 star breakdown |
+| `GET` | `/api/reviews/customer/{customerId}/purchased-products` | List of products purchased by a customer |
+| `POST` | `/api/reviews` | Submit new review and rating (default: unapproved) |
+| `PUT` | `/api/reviews/{id}/moderate` | Moderate review (Approve or Reject via `{ status: true/false }`) |
+| `PUT` | `/api/reviews/{id}` | Update rating and feedback text (resets to unapproved) |
+| `DELETE` | `/api/reviews/{id}` | Delete review (admin or review owner) |
 
 ---
 
